@@ -42,7 +42,7 @@ def _get_analyzers():
     endpoint = "{}/{}/{}".format(KUBERNETES_API_URL,
                                  '/api/v1/namespaces/',
                                  THOTH_ANALYZER_NAMESPACE,
-                                 'pods?labelSelector=thothpod%3Dthoth-analyzer')
+                                 'pods?labelSelector=thothtype%3Duserpod')
     response = requests.get(
         endpoint,
         verify=False,
