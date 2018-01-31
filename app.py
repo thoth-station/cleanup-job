@@ -55,7 +55,9 @@ def _get_analyzers():
     )
     response.raise_for_status()
     _LOGGER.debug('Full response from Kubernetes master is: %r', response.json())
-    return (pod for pod in response.json().get('items', []))
+    pods = response.json().get('items', [])
+    _LOGGER.info('Kubernetes master returned %d pods', len(pods))
+    return pods
 
 
 def _delete_pod(pod_name):
