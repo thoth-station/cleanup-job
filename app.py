@@ -81,8 +81,8 @@ def _delete_old_analyzes(analyzers):
 
     for analyzer in analyzers:
         # TODO: also delete pods where pull failed
-        start_time = datetime_parser(analyzer['status']['startTime']).timestamp()
-        if start_time >= threshold_time:
+        creation_time = datetime_parser(analyzer['metadata']['creationTimestamp']).timestamp()
+        if creation_time >= threshold_time:
             _LOGGER.info("Deleting pod %r", analyzer['metadata']['name'])
             try:
                 _delete_pod(analyzer['metadata']['name'])
