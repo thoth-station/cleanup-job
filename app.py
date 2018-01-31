@@ -31,7 +31,7 @@ THOTH_ANALYZER_CLEANUP_TIME = timeparse(os.getenv('THOTH_ANALYZER_CLEANUP_TIME',
 
 def _setup_logging():
     """Set logging level based on configuration."""
-    debug = bool(os.getenv('THOTH_DEBUG', False))
+    debug = bool(os.getenv('THOTH_CLEANUP_DEBUG', False))
     log_level = logging.DEBUG if debug else logging.INFO
     _LOGGER.setLevel(level=log_level)
 
