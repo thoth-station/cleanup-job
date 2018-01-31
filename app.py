@@ -41,10 +41,10 @@ def _setup_logging():
 def _get_analyzers():
     """Get currently running analyzers."""
     # TODO: pagination?
-    endpoint = "{}/{}/{}".format(KUBERNETES_API_URL,
-                                 '/api/v1/namespaces/',
-                                 THOTH_ANALYZER_NAMESPACE,
-                                 'pods?labelSelector=thothtype%3Duserpod')
+    endpoint = "{}/{}/{}/{}".format(KUBERNETES_API_URL,
+                                    '/api/v1/namespaces/',
+                                    THOTH_ANALYZER_NAMESPACE,
+                                    'pods?labelSelector=thothtype%3Duserpod')
     response = requests.get(
         endpoint,
         verify=False,
