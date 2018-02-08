@@ -24,7 +24,7 @@ def _get_api_token():
 _LOGGER = logging.getLogger(__name__)
 
 KUBERNETES_API_URL = os.getenv('KUBERNETES_API_URL', 'https://kubernetes.default.svc.cluster.local')
-KUBERNETES_API_TOKEN = os.getenv('KUBERNETES_API_TOKEN', _get_api_token())
+KUBERNETES_API_TOKEN = os.getenv('KUBERNETES_API_TOKEN') or _get_api_token()
 THOTH_ANALYZER_NAMESPACE = os.environ['THOTH_ANALYZER_NAMESPACE']
 THOTH_ANALYZER_CLEANUP_TIME = timeparse(os.getenv('THOTH_ANALYZER_CLEANUP_TIME', '7d'))
 
