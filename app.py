@@ -47,7 +47,7 @@ def _get_analyzers():
                                     'pods?labelSelector=thothtype%3Duserpod')
     response = requests.get(
         endpoint,
-        verify=False,
+        verify=bool(os.getenv('KUBERNETES_VERIFY_TLS', True)),
         headers={
             'Authorization': 'Bearer {}'.format(KUBERNETES_API_TOKEN),
             'Content-Type': 'application/json'
@@ -68,7 +68,7 @@ def _delete_pod(pod_name):
                                     pod_name)
     response = requests.delete(
         endpoint,
-        verify=False,
+        verify=bool(os.getenv('KUBERNETES_VERIFY_TLS', True)),
         headers={
             'Authorization': 'Bearer {}'.format(KUBERNETES_API_TOKEN),
             'Content-Type': 'application/json'
