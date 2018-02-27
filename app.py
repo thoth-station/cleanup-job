@@ -47,7 +47,7 @@ def _get_analyzers():
                                     'pods?labelSelector=thothtype%3Duserpod')
     response = requests.get(
         endpoint,
-        verify=bool(os.getenv('KUBERNETES_VERIFY_TLS', True)),
+        verify=bool(int(os.getenv('KUBERNETES_VERIFY_TLS', True))),
         headers={
             'Authorization': 'Bearer {}'.format(KUBERNETES_API_TOKEN),
             'Content-Type': 'application/json'
