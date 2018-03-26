@@ -10,6 +10,8 @@ from dateutil.parser import parse as datetime_parser
 from pytimeparse.timeparse import timeparse
 import requests
 
+from thoth.common import init_logging
+
 
 def _get_api_token():
     """Get token to Kubernetes master."""
@@ -21,21 +23,12 @@ def _get_api_token():
                                 "service account assigned with exposed token") from exc
 
 
-_LOGGER = logging.getLogger(__name__)
+_LOGGER = logging.getLogger('thoth.cleanup_job')
 
 KUBERNETES_API_URL = os.getenv('KUBERNETES_API_URL', 'https://kubernetes.default.svc.cluster.local')
 KUBERNETES_API_TOKEN = os.getenv('KUBERNETES_API_TOKEN') or _get_api_token()
 THOTH_MIDDLEEND_NAMESPACE = os.environ['THOTH_MIDDLEEND_NAMESPACE']
 THOTH_ANALYZER_CLEANUP_TIME = timeparse(os.getenv('THOTH_ANALYZER_CLEANUP_TIME', '7d'))
-
-
-def _setup_logging():
-    """Set logging level based on configuration."""
-    logging.basicConfig()
-    debug = bool(os.getenv('THOTH_CLEANUP_DEBUG', False))
-    log_level = logging.DEBUG if debug else logging.INFO
-    _LOGGER.setLevel(level=log_level)
-    _LOGGER.debug("Debug mode is on")
 
 
 def _get_analyzers():
@@ -98,7 +91,7 @@ def _delete_old_analyzes(analyzers):
 
 
 def main():
-    _setup_logging()
+    init_logging()
     analyzers = _get_analyzers()
     _delete_old_analyzes(analyzers)
 
