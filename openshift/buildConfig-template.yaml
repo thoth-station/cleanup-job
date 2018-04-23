@@ -16,16 +16,6 @@ metadata:
 
 objects:
 - apiVersion: v1
-  kind: ImageStream
-  metadata:
-    labels:
-      app: thoth-core
-    name: cleanup-cronjob
-  spec:
-    name: latest
-    lookupPolicy:
-      local: true
-- apiVersion: v1
   kind: BuildConfig
   metadata:
     labels:
