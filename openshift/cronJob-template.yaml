@@ -4,7 +4,7 @@ labels:
   template: cleanup-cronjob
   thoth: 0.1.0
 metadata:
-  name: cleanup-job
+  name: cleanup-cronjob
   annotations:
     description: This is Thoth Core - Cleanup Job
     openshift.io/display-name: "Thoth: Cleanup Job"
@@ -18,7 +18,7 @@ objects:
 - apiVersion: batch/v2alpha1
   kind: CronJob
   metadata:
-    name: cleanup-job
+    name: cleanup
     labels:
       app: thoth-core
   spec:
@@ -32,8 +32,8 @@ objects:
           spec:
             serviceAccountName: analyzer
             containers:
-            - image: cleanup-cronjob
-              name: cleanup-cronjob
+            - image: cleanup-job
+              name: cleanup
               env:
                - name: KUBERNETES_VERIFY_TLS
                  value: "0"

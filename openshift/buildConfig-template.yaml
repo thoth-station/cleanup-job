@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Template
 labels:
-  template: cleanup-cronjob-buildconfig
+  template: cleanup-buildconfig
   thoth: 0.1.0
 metadata:
-  name: cleanup-cronjob-buildconfig
+  name: cleanup-buildconfig
   annotations:
     description: This is Thoth CleanUp CronJob BuildConfig, this template is meant to be used by Jenkins, but could also be used by humans...
     openshift.io/display-name: Thoth User API BuildConfig
@@ -20,12 +20,12 @@ objects:
   metadata:
     labels:
       app: thoth-core
-    name: cleanup-cronjob
+    name: cleanup-job
   spec:
     output:
       to:
         kind: ImageStreamTag
-        name: "cleanup-cronjob:${IMAGE_STREAM_TAG}"
+        name: "cleanup-job:${IMAGE_STREAM_TAG}"
     runPolicy: Serial
     source:
       git:
