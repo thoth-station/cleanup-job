@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Template
 labels:
-  template: thoth-cleanup-cronjob-imagestream
+  template: cleanup-cronjob-imagestream
   thoth: 0.1.0
 metadata:
-  name: thoth-cleanup-cronjob-imagestream
+  name: cleanup-cronjob-imagestream
   annotations:
     description: This is Thoth CleanUp CronJob ImageStream, this template is meant to be used by Jenkins, but could also be used by humans...
     openshift.io/display-name: Thoth User API ImageStream
