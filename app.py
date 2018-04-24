@@ -35,7 +35,7 @@ def _get_analyzers():
     """Get currently running analyzers."""
     # TODO: pagination?
     endpoint = "{}/{}/{}/{}".format(KUBERNETES_API_URL,
-                                    '/api/v1/namespaces/',
+                                    'api/v1/namespaces',
                                     THOTH_MIDDLEEND_NAMESPACE,
                                     'pods?labelSelector=thothtype%3Duserpod')
     response = requests.get(
@@ -55,7 +55,7 @@ def _get_analyzers():
 
 def _delete_pod(pod_name):
     endpoint = "{}/{}/{}/{}".format(KUBERNETES_API_URL,
-                                    '/api/v1/namespaces/',
+                                    'api/v1/namespaces',
                                     THOTH_MIDDLEEND_NAMESPACE,
                                     'pods',
                                     pod_name)
