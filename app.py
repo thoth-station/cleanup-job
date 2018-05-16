@@ -108,6 +108,7 @@ def _delete_old_analyzes(analyzers):
 
 
 def main():
+    """Perform cleanup of Kubernetes records."""
     init_logging()
     analyzers = _get_analyzers()
     _delete_old_analyzes(analyzers)
