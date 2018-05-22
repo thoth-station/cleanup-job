@@ -54,6 +54,16 @@ objects:
                   configMapKeyRef:
                     key: log-cleanup-job
                     name: thoth
+               - name: RSYSLOG_HOST
+                 valueFrom:
+                  configMapKeyRef:
+                    key: rsyslog-host
+                    name: thoth
+               - name: RSYSLOG_PORT
+                 valueFrom:
+                  configMapKeyRef:
+                    key: rsyslog-port
+                    name: thoth
               resources:
                 requests:
                   memory: "32Mi"
