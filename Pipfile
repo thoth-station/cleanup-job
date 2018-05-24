@@ -7,7 +7,7 @@ name = "pypi"
 requests = "*"
 pytimeparse = "*"
 python-dateutil = "*"
-thoth-common = ">=0.0.6"
+thoth-common = "*"
 
 [dev-packages]
 coala = "*"
