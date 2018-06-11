@@ -37,7 +37,7 @@ objects:
               env:
                - name: KUBERNETES_VERIFY_TLS
                  value: "0"
-               - name: THOTH_MIDDLEEND_NAMESPACE
+               - name: THOTH_MIDDLETIER_NAMESPACE
                  valueFrom:
                    configMapKeyRef:
                      key: middletier-namespace
