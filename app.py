@@ -44,7 +44,7 @@ _LOGGER = logging.getLogger('thoth.cleanup_job')
 
 KUBERNETES_API_URL = os.getenv('KUBERNETES_API_URL', 'https://kubernetes.default.svc.cluster.local')
 KUBERNETES_API_TOKEN = os.getenv('KUBERNETES_API_TOKEN') or _get_api_token()
-THOTH_MIDDLEEND_NAMESPACE = os.environ['THOTH_MIDDLEEND_NAMESPACE']
+THOTH_MIDDLETIER_NAMESPACE = os.environ['THOTH_MIDDLETIER_NAMESPACE']
 THOTH_ANALYZER_CLEANUP_TIME = timeparse(os.getenv('THOTH_ANALYZER_CLEANUP_TIME', '7d'))
 
 
@@ -53,7 +53,7 @@ def _get_analyzers():
     # TODO: pagination?
     endpoint = "{}/{}/{}/{}".format(KUBERNETES_API_URL,
                                     'api/v1/namespaces',
-                                    THOTH_MIDDLEEND_NAMESPACE,
+                                    THOTH_MIDDLETIER_NAMESPACE,
                                     'pods?labelSelector=thothtype%3Duserpod')
     response = requests.get(
         endpoint,
@@ -73,7 +73,7 @@ def _get_analyzers():
 def _delete_pod(pod_name):
     endpoint = "{}/{}/{}/{}".format(KUBERNETES_API_URL,
                                     'api/v1/namespaces',
-                                    THOTH_MIDDLEEND_NAMESPACE,
+                                    THOTH_MIDDLETIER_NAMESPACE,
                                     'pods',
                                     pod_name)
     response = requests.delete(
