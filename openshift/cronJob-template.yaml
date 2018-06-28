@@ -26,6 +26,7 @@ objects:
     suspend: true
     successfulJobsHistoryLimit: 4
     failedJobsHistoryLimit: 1
+    concurrencyPolicy: Forbid
     jobTemplate:
       spec:
         template:
