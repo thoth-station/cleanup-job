@@ -51,10 +51,7 @@ objects:
                - name: KUBERNETES_API_URL
                  value: 'https://kubernetes.default.svc.cluster.local'
                - name: THOTH_LOG_CLEANUP_JOB
-                 valueFrom:
-                  configMapKeyRef:
-                    key: log-cleanup-job
-                    name: thoth
+                 value: 'DEBUG'
                - name: RSYSLOG_HOST
                  valueFrom:
                   configMapKeyRef:
