@@ -28,22 +28,13 @@ from pytimeparse.timeparse import timeparse
 import requests
 
 from thoth.common import init_logging
-
-
-def _get_api_token():
-    """Get token to Kubernetes master."""
-    try:
-        with open('/var/run/secrets/kubernetes.io/serviceaccount/token', 'r') as token_file:
-            return token_file.read()
-    except FileNotFoundError as exc:
-        raise FileNotFoundError("Unable to get service account token, please check that service has "
-                                "service account assigned with exposed token") from exc
+from thoth.common import get_service_account_token
 
 
 _LOGGER = logging.getLogger('thoth.cleanup_job')
 
 KUBERNETES_API_URL = os.getenv('KUBERNETES_API_URL', 'https://kubernetes.default.svc.cluster.local')
-KUBERNETES_API_TOKEN = os.getenv('KUBERNETES_API_TOKEN') or _get_api_token()
+KUBERNETES_API_TOKEN = os.getenv('KUBERNETES_API_TOKEN') or get_service_account_token()
 THOTH_MIDDLETIER_NAMESPACE = os.environ['THOTH_MIDDLETIER_NAMESPACE']
 THOTH_ANALYZER_CLEANUP_TIME = timeparse(os.getenv('THOTH_ANALYZER_CLEANUP_TIME', '7d'))
 
