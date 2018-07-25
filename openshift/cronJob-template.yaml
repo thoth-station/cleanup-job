@@ -25,7 +25,7 @@ objects:
       component: cleanup
   spec:
     schedule: "@weekly"
-    suspend: ${THOTH_SUSPEND_JOB}
+    suspend: "${THOTH_SUSPEND_JOB}"
     successfulJobsHistoryLimit: 4
     failedJobsHistoryLimit: 1
     concurrencyPolicy: Forbid
