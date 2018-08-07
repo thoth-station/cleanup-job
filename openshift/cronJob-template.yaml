@@ -32,6 +32,11 @@ objects:
     jobTemplate:
       spec:
         template:
+          metadata:
+            name: cleanup
+            labels:
+              app: thoth
+              component: cleanup
           spec:
             serviceAccountName: analyzer
             containers:
