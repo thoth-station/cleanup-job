@@ -92,7 +92,7 @@ def _delete_old_analyzes(analyzers):
             _LOGGER.info("Deleting pod %r", analyzer['metadata']['name'])
             try:
                 _delete_pod(analyzer['metadata']['name'])
-            except:
+            except Exception:
                 _LOGGER.exception("Failed to delete pod {!r}, error is not fatal".format(analyzer['metadata']['name']))
         else:
             _LOGGER.info("Keeping pod %r, not too old yet", analyzer['metadata']['name'])

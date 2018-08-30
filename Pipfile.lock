@@ -16,10 +16,10 @@
     "default": {
         "certifi": {
             "hashes": [
-                "sha256:13e698f54293db9f89122b0581843a782ad0934a4fe0172d2a980ba77fc61bb7",
-                "sha256:9fa520c1bacfb634fa7af20a76bcbd3d5fb390481724c597da32c719a7dca4b0"
+                "sha256:376690d6f16d32f9d1fe8932551d80b23e9d393a8578c5633a2ed39a64861638",
+                "sha256:456048c7e371c089d0a77a5212fb37a2c2dce1e24146e3b7e0261736aaeaa22a"
             ],
-            "version": "==2018.4.16"
+            "version": "==2018.8.24"
         },
         "chardet": {
             "hashes": [
@@ -89,11 +89,11 @@
         },
         "thoth-common": {
             "hashes": [
-                "sha256:40a59b979d325dda87eb8a31e9f9bb5a3385d49548ecce107fea6aa7ff66fa4f",
-                "sha256:60f8b9e83d0e658b41264bdb7377cfc03f8fdf27710684f29a131b95860b217b"
+                "sha256:2407890df79edcd94defc4a3bfd63d46a1e470ddb5bfc452cae822536ebfb680",
+                "sha256:882c6dda2dcb51de6165daaca3aeadd5b6ba2c5d627869c8b7b9e84e6df874c3"
             ],
             "index": "pypi",
-            "version": "==0.2.2"
+            "version": "==0.2.5"
         },
         "tzlocal": {
             "hashes": [
@@ -106,7 +106,7 @@
                 "sha256:a68ac5e15e76e7e5dd2b8f94007233e01effe3e50e8daddf69acfd81cb686baf",
                 "sha256:b5725a0bd4ba422ab0e66e89e030c806576753ea3ee08554382c14e685d117b5"
             ],
-            "markers": "python_version != '3.0.*' and python_version < '4' and python_version != '3.2.*' and python_version >= '2.6' and python_version != '3.1.*' and python_version != '3.3.*'",
+            "markers": "python_version >= '2.6' and python_version < '4' and python_version != '3.1.*' and python_version != '3.3.*' and python_version != '3.2.*' and python_version != '3.0.*'",
             "version": "==1.23"
         }
     },
@@ -120,10 +120,10 @@
         },
         "certifi": {
             "hashes": [
-                "sha256:13e698f54293db9f89122b0581843a782ad0934a4fe0172d2a980ba77fc61bb7",
-                "sha256:9fa520c1bacfb634fa7af20a76bcbd3d5fb390481724c597da32c719a7dca4b0"
+                "sha256:376690d6f16d32f9d1fe8932551d80b23e9d393a8578c5633a2ed39a64861638",
+                "sha256:456048c7e371c089d0a77a5212fb37a2c2dce1e24146e3b7e0261736aaeaa22a"
             ],
-            "version": "==2018.4.16"
+            "version": "==2018.8.24"
         },
         "chardet": {
             "hashes": [
@@ -277,7 +277,7 @@
                 "sha256:a68ac5e15e76e7e5dd2b8f94007233e01effe3e50e8daddf69acfd81cb686baf",
                 "sha256:b5725a0bd4ba422ab0e66e89e030c806576753ea3ee08554382c14e685d117b5"
             ],
-            "markers": "python_version != '3.0.*' and python_version < '4' and python_version != '3.2.*' and python_version >= '2.6' and python_version != '3.1.*' and python_version != '3.3.*'",
+            "markers": "python_version >= '2.6' and python_version < '4' and python_version != '3.1.*' and python_version != '3.3.*' and python_version != '3.2.*' and python_version != '3.0.*'",
             "version": "==1.23"
         },
         "yamllint": {
