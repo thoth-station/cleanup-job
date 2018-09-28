@@ -82,10 +82,10 @@
         },
         "sentry-sdk": {
             "hashes": [
-                "sha256:3521606a5cfe30f8363517fe8ab8f26ea33a3c87967b7b25267e719c383ff599",
-                "sha256:a4aa43344bf7bb20ec2d63a1776de1bbd3648e314b581b5b619dae803706eaa1"
+                "sha256:4cf67f901fd39041cd58fe8ce5e11336c71cb3dece3cea8bc081fc2f9c1ba57a",
+                "sha256:87e8a8e21eae401961a9646a46b3702b0adff7efbae93559aff345c46c93d745"
             ],
-            "version": "==0.3.5"
+            "version": "==0.3.6"
         },
         "six": {
             "hashes": [
@@ -96,11 +96,11 @@
         },
         "thoth-common": {
             "hashes": [
-                "sha256:4dbcfc962d68a867bfe53f9d3dc14985158ef6473ebffc381309101d3f85c877",
-                "sha256:ae995c2ce1be14fb270cdf4be2a8d60866d2bdfa8e2b0c236c6c71759c87096f"
+                "sha256:26994286681560d437d82671d9c826c169fb8b1c7c73d0264a7aaf411257ab17",
+                "sha256:a5c26bddec45a4c231d71191d85f24583c97dcd1faa8956844878ed891f744d2"
             ],
             "index": "pypi",
-            "version": "==0.3.2"
+            "version": "==0.3.5"
         },
         "tzlocal": {
             "hashes": [
@@ -113,7 +113,7 @@
                 "sha256:a68ac5e15e76e7e5dd2b8f94007233e01effe3e50e8daddf69acfd81cb686baf",
                 "sha256:b5725a0bd4ba422ab0e66e89e030c806576753ea3ee08554382c14e685d117b5"
             ],
-            "markers": "python_version < '4' and python_version != '3.3.*' and python_version != '3.2.*' and python_version >= '2.6' and python_version != '3.1.*' and python_version != '3.0.*'",
+            "markers": "python_version >= '2.6' and python_version != '3.3.*' and python_version != '3.0.*' and python_version != '3.1.*' and python_version != '3.2.*' and python_version < '4'",
             "version": "==1.23"
         }
     },
@@ -284,7 +284,7 @@
                 "sha256:a68ac5e15e76e7e5dd2b8f94007233e01effe3e50e8daddf69acfd81cb686baf",
                 "sha256:b5725a0bd4ba422ab0e66e89e030c806576753ea3ee08554382c14e685d117b5"
             ],
-            "markers": "python_version < '4' and python_version != '3.3.*' and python_version != '3.2.*' and python_version >= '2.6' and python_version != '3.1.*' and python_version != '3.0.*'",
+            "markers": "python_version >= '2.6' and python_version != '3.3.*' and python_version != '3.0.*' and python_version != '3.1.*' and python_version != '3.2.*' and python_version < '4'",
             "version": "==1.23"
         },
         "yamllint": {
