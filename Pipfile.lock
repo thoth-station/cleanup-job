@@ -82,10 +82,10 @@
         },
         "sentry-sdk": {
             "hashes": [
-                "sha256:4cf67f901fd39041cd58fe8ce5e11336c71cb3dece3cea8bc081fc2f9c1ba57a",
-                "sha256:87e8a8e21eae401961a9646a46b3702b0adff7efbae93559aff345c46c93d745"
+                "sha256:593c81517e98ab67edc8def34fe3afacde83eb899da31cd069b448a0ac122a83",
+                "sha256:6fcb7e87069221e3ddbc9a7baf756e69b3346020f8fa20057d0df2466d8ea011"
             ],
-            "version": "==0.3.6"
+            "version": "==0.3.11"
         },
         "six": {
             "hashes": [
@@ -96,11 +96,11 @@
         },
         "thoth-common": {
             "hashes": [
-                "sha256:0ca00dc1a826885216de02d81f5cdf10ea6b570d91473e40b4b4d9f0e29e210a",
-                "sha256:93e0f8cab4076b7b30543113cecbb16410f1e44beedf445c6da6239c438903d9"
+                "sha256:588d377a496655f600676801e430a5c7f2f682350a774866d787f65e75f4f0f3",
+                "sha256:db26bc1c619deff5e77b8a5b754921d19c917cc05ffeca30f15aa4b7f1cfacff"
             ],
             "index": "pypi",
-            "version": "==0.3.6"
+            "version": "==0.3.7"
         },
         "tzlocal": {
             "hashes": [
@@ -113,7 +113,6 @@
                 "sha256:a68ac5e15e76e7e5dd2b8f94007233e01effe3e50e8daddf69acfd81cb686baf",
                 "sha256:b5725a0bd4ba422ab0e66e89e030c806576753ea3ee08554382c14e685d117b5"
             ],
-            "markers": "python_version != '3.1.*' and python_version != '3.3.*' and python_version >= '2.6' and python_version != '3.2.*' and python_version != '3.0.*' and python_version < '4'",
             "version": "==1.23"
         }
     },
@@ -265,13 +264,6 @@
             ],
             "version": "==1.1.0"
         },
-        "testfixtures": {
-            "hashes": [
-                "sha256:41360bceecfdb2dff9e327a49caaff8b1b4a984ed2cff761658ec2c31e5afbd9",
-                "sha256:670ade9410b7132278209e6a2e893caf098b040c4ba4d5ea848367a9c5588728"
-            ],
-            "version": "==5.3.1"
-        },
         "unidiff": {
             "hashes": [
                 "sha256:6e7ff4be1a9cd8d72197cd15ec735260b8b95d6f9d3e6fdc8a37301b12af0b27",
@@ -284,7 +276,6 @@
                 "sha256:a68ac5e15e76e7e5dd2b8f94007233e01effe3e50e8daddf69acfd81cb686baf",
                 "sha256:b5725a0bd4ba422ab0e66e89e030c806576753ea3ee08554382c14e685d117b5"
             ],
-            "markers": "python_version != '3.1.*' and python_version != '3.3.*' and python_version >= '2.6' and python_version != '3.2.*' and python_version != '3.0.*' and python_version < '4'",
             "version": "==1.23"
         },
         "yamllint": {
