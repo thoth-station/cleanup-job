@@ -3,10 +3,12 @@ kind: Template
 metadata:
   name: cleanup-imagestream
   annotations:
-    description: This is Thoth CleanUp CronJob ImageStream, this template is meant to be used by Jenkins, but could also be used by humans...
-    openshift.io/display-name: Thoth User API ImageStream
-    version: 0.1.0
-    tags: poc,thoth,thoth-user-api,ai-stacks
+    description: >
+      This is Thoth CleanUp CronJob ImageStream, this template is meant to be used by Bots,
+      but could also be used by humans...
+    openshift.io/display-name: Thoth Cleanup CronJob ImageStream
+    version: 0.6.0
+    tags: thoth,ai-stacks,aistacks
     template.openshift.io/documentation-url: https://github.com/AICoE/Thoth/
     template.openshift.io/long-description: >
       This is Thoth CleanUp CronJob ImageStream, this template is meant to be used by Bots,
