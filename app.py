@@ -33,11 +33,16 @@ from thoth.common import get_service_account_token
 
 _LOGGER = logging.getLogger("thoth.cleanup_job")
 
+init_logging()
+prometheus_registry = CollectorRegistry()
+
+_LOGGER = logging.getLogger("thoth.cleanup_job")
+
 KUBERNETES_API_URL = os.getenv(
     "KUBERNETES_API_URL", "https://kubernetes.default.svc.cluster.local"
 )
 KUBERNETES_API_TOKEN = os.getenv("KUBERNETES_API_TOKEN") or get_service_account_token()
-KUBERNETES_VERIFY_TLS = bool(int(os.getenv("KUBERNETES_VERIFY_TLS", False)))
+KUBERNETES_VERIFY_TLS = bool(int(os.getenv("KUBERNETES_VERIFY_TLS", 0)))
 THOTH_MIDDLETIER_NAMESPACE = os.environ["THOTH_MIDDLETIER_NAMESPACE"]
 THOTH_CLEANUP_TIMEOUT = timeparse(os.getenv("THOTH_CLEANUP_TIMEOUT", "5d"))
 THOTH_METRICS_PUSHGATEWAY_URL = os.getenv("THOTH_METRICS_PUSHGATEWAY_URL")
@@ -80,6 +85,8 @@ def _get_jobs(label_selector: str) -> dict:
         f"{KUBERNETES_API_URL}/apis/batch/v1/namespaces/{THOTH_MIDDLETIER_NAMESPACE}/"
         f"jobs?labelSelector={label_selector}&limit=500"
     )  # we play nice and just get 500
+
+    _LOGGER.debug("KUBERNETES_VERIFY_TLS=%s", KUBERNETES_VERIFY_TLS)
 
     response = requests.get(
         endpoint,
@@ -181,6 +188,7 @@ if __name__ == "__main__":
     )
 
     _LOGGER.info(f"Thoth Cleanup Job v{__version__} starting...")
+    _LOGGER.debug("running with DEBUG log level")
 
     with _METRIC_RUNTIME.time():
         # let's delete all succeeded and outdated Solver Jobs
