@@ -175,13 +175,6 @@ def _delete_outdated_jobs(jobs: dict):
     lifetime = datetime.timedelta(seconds=THOTH_CLEANUP_TIMEOUT).total_seconds()
 
 
-def main():
-    """Perform cleanup of Kubernetes records."""
-    init_logging()
-    analyzers = _get_analyzers()
-    _delete_old_analyzes(analyzers)
-
-
 if __name__ == "__main__":
     _LOGGER.setLevel(
         logging.DEBUG if bool(int(os.getenv("CLEANUP_DEBUG", 0))) else logging.INFO
