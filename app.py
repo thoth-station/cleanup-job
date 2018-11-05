@@ -49,8 +49,18 @@ THOTH_METRICS_PUSHGATEWAY_URL = os.getenv("THOTH_METRICS_PUSHGATEWAY_URL")
 THOTH_MY_NAMESPACE = os.getenv("NAMESPACE", "thoth-test-core")
 
 
-def _get_analyzers():
-    """Get currently running analyzers."""
+# Metrics Exporter Metrics
+_METRIC_INFO = Gauge(
+    "thoth_cleanup_job_info",
+    "Thoth Cleanup Job information",
+    ["env", "version"],
+    registry=prometheus_registry,
+)
+_METRIC_INFO.labels(THOTH_MY_NAMESPACE, __version__).inc()
+
+
+def _get_pods(label_selector: str) -> dict:
+    """Get currently running analyzers by label."""
     # TODO: pagination?
     endpoint = "{}/{}/{}/{}".format(
         KUBERNETES_API_URL,
