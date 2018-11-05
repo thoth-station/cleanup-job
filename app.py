@@ -37,8 +37,11 @@ KUBERNETES_API_URL = os.getenv(
     "KUBERNETES_API_URL", "https://kubernetes.default.svc.cluster.local"
 )
 KUBERNETES_API_TOKEN = os.getenv("KUBERNETES_API_TOKEN") or get_service_account_token()
+KUBERNETES_VERIFY_TLS = bool(int(os.getenv("KUBERNETES_VERIFY_TLS", False)))
 THOTH_MIDDLETIER_NAMESPACE = os.environ["THOTH_MIDDLETIER_NAMESPACE"]
-THOTH_ANALYZER_CLEANUP_TIME = timeparse(os.getenv("THOTH_ANALYZER_CLEANUP_TIME", "7d"))
+THOTH_CLEANUP_TIMEOUT = timeparse(os.getenv("THOTH_CLEANUP_TIMEOUT", "5d"))
+THOTH_METRICS_PUSHGATEWAY_URL = os.getenv("THOTH_METRICS_PUSHGATEWAY_URL")
+THOTH_MY_NAMESPACE = os.getenv("NAMESPACE", "thoth-test-core")
 
 
 def _get_analyzers():
@@ -52,7 +55,7 @@ def _get_analyzers():
     )
     response = requests.get(
         endpoint,
-        verify=bool(int(os.getenv("KUBERNETES_VERIFY_TLS", True))),
+        verify=KUBERNETES_VERIFY_TLS,
         headers={
             "Authorization": "Bearer {}".format(KUBERNETES_API_TOKEN),
             "Content-Type": "application/json",
@@ -80,7 +83,7 @@ def _get_jobs(label_selector: str) -> dict:
 
     response = requests.get(
         endpoint,
-        verify=bool(int(os.getenv("KUBERNETES_VERIFY_TLS", True))),
+        verify=KUBERNETES_VERIFY_TLS,
         headers={
             "Authorization": "Bearer {}".format(KUBERNETES_API_TOKEN),
             "Content-Type": "application/json",
