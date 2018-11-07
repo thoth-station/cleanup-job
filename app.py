@@ -169,7 +169,7 @@ def _delete_object(api: str, type: str, name: str):
 
     response = requests.delete(
         endpoint,
-        verify=False,
+        verify=KUBERNETES_VERIFY_TLS,
         headers={
             "Authorization": "Bearer {}".format(KUBERNETES_API_TOKEN),
             "Content-Type": "application/json",
