@@ -163,9 +163,9 @@ def _delete_old_analyzes(analyzers):
             _LOGGER.info("Keeping pod %r, not too old yet", pod["metadata"]["name"])
 
 
-def _delete_object(api: str, type: str, name: str):
-    """Delete Object of Type type within API Group api."""
-    endpoint = f"{KUBERNETES_API_URL}/{api}/namespaces/{THOTH_MIDDLETIER_NAMESPACE}/{type}/{name}"
+def _delete_object(api: str, kind: str, name: str):
+    """Delete Object of Kind kind within API Group api."""
+    endpoint = f"{KUBERNETES_API_URL}/{api}/namespaces/{THOTH_MIDDLETIER_NAMESPACE}/{kind}/{name}"
 
     response = requests.delete(
         endpoint,
