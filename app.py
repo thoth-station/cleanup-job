@@ -18,6 +18,7 @@
 
 """Delete old analyzers in the cluster."""
 
+
 import datetime
 import logging
 import os
@@ -29,9 +30,11 @@ import requests
 
 from thoth.common import init_logging
 from thoth.common import get_service_account_token
+from thoth.common import __version__ as __common__version__
 
 
-_LOGGER = logging.getLogger("thoth.cleanup_job")
+__version__ = f"0.6.1+common.{__common__version__}"
+
 
 init_logging()
 prometheus_registry = CollectorRegistry()
