@@ -28,18 +28,19 @@ from dateutil.parser import parse as datetime_parser
 from pytimeparse.timeparse import timeparse
 import requests
 
-from thoth.common import init_logging
-from thoth.common import get_service_account_token
+from thoth.common import init_logging, get_service_account_token, OpenShift
 from thoth.common import __version__ as __common__version__
+from thoth.common.exceptions import NotFoundException
 
-
-__version__ = f"0.6.1+common.{__common__version__}"
+__version__ = f"0.6.2+common.{__common__version__}"
 
 
 init_logging()
 prometheus_registry = CollectorRegistry()
 
 _LOGGER = logging.getLogger("thoth.cleanup_job")
+_OPENSHIFT = OpenShift()
+
 
 KUBERNETES_API_URL = os.getenv(
     "KUBERNETES_API_URL", "https://kubernetes.default.svc.cluster.local"
@@ -51,6 +52,18 @@ THOTH_CLEANUP_TIMEOUT = timeparse(os.getenv("THOTH_CLEANUP_TIMEOUT", "5d"))
 THOTH_METRICS_PUSHGATEWAY_URL = os.getenv("THOTH_METRICS_PUSHGATEWAY_URL")
 THOTH_MY_NAMESPACE = os.getenv("NAMESPACE", "thoth-test-core")
 
+_METRIC_RUNTIME = Gauge(
+    "thoth_cleanup_job_runtime_seconds",
+    "Runtime of cleanup job in seconds.",
+    [],
+    registry=prometheus_registry,
+)
+_METRIC_SOLVER_JOBS = Counter(
+    "thoth_cleanup_job_solver_jobs",
+    "Solver Jobs cleaned up.",
+    ["env", "op"],
+    registry=prometheus_registry,
+)
 
 # Metrics Exporter Metrics
 _METRIC_INFO = Gauge(
@@ -65,12 +78,11 @@ _METRIC_INFO.labels(THOTH_MY_NAMESPACE, __version__).inc()
 def _get_pods(label_selector: str) -> dict:
     """Get currently running analyzers by label."""
     # TODO: pagination?
-    endpoint = "{}/{}/{}/{}".format(
-        KUBERNETES_API_URL,
-        "api/v1/namespaces",
-        THOTH_MIDDLETIER_NAMESPACE,
-        "pods?labelSelector=thothtype%3Duserpod",
+    endpoint = (
+        f"{KUBERNETES_API_URL}/api/v1/namespaces/{THOTH_MIDDLETIER_NAMESPACE}/"
+        f"pods?labelSelector={label_selector}"
     )
+
     response = requests.get(
         endpoint,
         verify=KUBERNETES_VERIFY_TLS,
@@ -90,36 +102,6 @@ def _get_pods(label_selector: str) -> dict:
     return pods
 
 
-def _get_jobs(label_selector: str) -> dict:
-    """Get succeeded jobs by label."""
-    # TODO: pagination?
-    # TODO: if label_selector is empty do not use it for requests.get()
-    endpoint = (
-        f"{KUBERNETES_API_URL}/apis/batch/v1/namespaces/{THOTH_MIDDLETIER_NAMESPACE}/"
-        f"jobs?labelSelector={label_selector}&limit=500"
-    )  # we play nice and just get 500
-
-    _LOGGER.debug("KUBERNETES_VERIFY_TLS=%s", KUBERNETES_VERIFY_TLS)
-
-    response = requests.get(
-        endpoint,
-        verify=KUBERNETES_VERIFY_TLS,
-        headers={
-            "Authorization": "Bearer {}".format(KUBERNETES_API_TOKEN),
-            "Content-Type": "application/json",
-        },
-    )
-    response.raise_for_status()
-    _LOGGER.debug("Full response from Kubernetes master is: %r", response.json())
-
-    jobs = response.json().get("items", [])
-    _LOGGER.info(
-        "Kubernetes master returned %r jobs with label %s", len(jobs), label_selector
-    )
-
-    return jobs
-
-
 def _delete_pod(pod_name):
     endpoint = "{}/{}/{}/{}".format(
         KUBERNETES_API_URL,
@@ -130,7 +112,7 @@ def _delete_pod(pod_name):
     )
     response = requests.delete(
         endpoint,
-        verify=bool(os.getenv("KUBERNETES_VERIFY_TLS", True)),
+        verify=KUBERNETES_VERIFY_TLS,
         headers={
             "Authorization": "Bearer {}".format(KUBERNETES_API_TOKEN),
             "Content-Type": "application/json",
@@ -150,16 +132,16 @@ def _delete_old_analyzes(analyzers):
     for analyzer in analyzers:
         # TODO: also delete pods where pull failed
         creation_time = datetime_parser(
-            analyzer["metadata"]["creationTimestamp"]
+            pod["metadata"]["creationTimestamp"]
         ).timestamp()
         if creation_time + lifetime <= now:
-            _LOGGER.info("Deleting pod %r", analyzer["metadata"]["name"])
+            _LOGGER.info("Deleting pod %r", pod["metadata"]["name"])
             try:
-                _delete_pod(analyzer["metadata"]["name"])
+                _delete_pod(pod["metadata"]["name"])
             except Exception:
                 _LOGGER.exception(
                     "Failed to delete pod {!r}, error is not fatal".format(
-                        analyzer["metadata"]["name"]
+                        pod["metadata"]["name"]
                     )
                 )
         else:
@@ -187,6 +169,27 @@ def _delete_outdated_jobs(jobs: dict):
     now = datetime.datetime.now().timestamp()
     lifetime = datetime.timedelta(seconds=THOTH_CLEANUP_TIMEOUT).total_seconds()
 
+    for ding in jobs:
+        creation_time = datetime_parser(
+            ding["metadata"]["creationTimestamp"]
+        ).timestamp()
+
+        if creation_time + lifetime <= now:
+            _LOGGER.debug("deleting Job %r", ding["metadata"]["name"])
+            try:
+                _delete_object("apis/batch/v1", "jobs", ding["metadata"]["name"])
+            except Exception:
+                _LOGGER.exception(
+                    "Failed to delete Job {!r}, error is not fatal".format(
+                        ding["metadata"]["name"]
+                    )
+                )
+
+            _METRIC_SOLVER_JOBS.labels(THOTH_MY_NAMESPACE, "delete").inc()
+        else:
+            _LOGGER.debug("keeping Job %r, it's to young", ding["metadata"]["name"])
+            _METRIC_SOLVER_JOBS.labels(THOTH_MY_NAMESPACE, "noop").inc()
+
 
 if __name__ == "__main__":
     _LOGGER.setLevel(
@@ -197,10 +200,13 @@ if __name__ == "__main__":
     _LOGGER.debug("running with DEBUG log level")
 
     with _METRIC_RUNTIME.time():
-        # let's delete all succeeded and outdated Solver Jobs
-        jobs = _get_jobs("component%3Dsolver-f27")
+        try:
+            # let's delete all succeeded and outdated Solver Jobs
+            jobs = get_jobs("component%3Dsolver-f27", "thoth-test-core")
 
-        _delete_outdated_jobs(jobs)
+            _delete_outdated_jobs(jobs)
+        except NotFoundException:
+            pass
 
     if THOTH_METRICS_PUSHGATEWAY_URL:
         try:
