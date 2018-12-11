@@ -4,13 +4,15 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-requests = "*"
 pytimeparse = "*"
+click = "*"
 python-dateutil = "*"
+openshift = "*"
+kubernetes = "*"
 thoth-common = "*"
+prometheus-client = "*"
 
 [dev-packages]
-coala = "*"
-pycodestylebear = "*"
-yamllintbear = "*"
-pydocstylebear = "*"
+
+[requires]
+python_version = "3.6"
