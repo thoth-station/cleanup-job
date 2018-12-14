@@ -57,13 +57,13 @@ _METRIC_INFO = Gauge(
 )
 _METRIC_JOBS = Counter("thoth_cleanup_jobs", "Jobs cleaned up.", ["env", "op"], registry=_PROMETHEUS_REGISTRY)
 _METRIC_BUILDCONFIGS = Counter(
-    "thoth_cleanup_buildconfigs", "Buildconfigs cleaned up.", ["env", "op"], registry=_PROMETHEUS_REGISTRY
+    "thoth_cleanup_job_buildconfigs", "Buildconfigs cleaned up.", ["env", "op"], registry=_PROMETHEUS_REGISTRY
 )
 _METRIC_IMAGESTREAMS = Counter(
-    "thoth_cleanup_imagestreams", "Imagestreams cleaned up.", ["env", "op"], registry=_PROMETHEUS_REGISTRY
+    "thoth_cleanup_job_imagestreams", "Imagestreams cleaned up.", ["env", "op"], registry=_PROMETHEUS_REGISTRY
 )
 _METRIC_CONFIGMAPS = Counter(
-    "thoth_cleanup_configmaps", "Configmaps cleaned up.", ["env", "op"], registry=_PROMETHEUS_REGISTRY
+    "thoth_cleanup_job_configmaps", "Configmaps cleaned up.", ["env", "op"], registry=_PROMETHEUS_REGISTRY
 )
 _RESOURCES = frozenset(
     (
