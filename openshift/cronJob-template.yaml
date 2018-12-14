@@ -5,10 +5,11 @@ metadata:
   annotations:
     description: This is Thoth Core - Cleanup Job
     openshift.io/display-name: "Thoth: Cleanup Job"
-    version: 0.6.0
+    version: 0.7.0
     tags: thoth,ai-stacks,aistacks,thoth-ops
     template.openshift.io/documentation-url: https://github.com/Thoth-Station/
-    template.openshift.io/long-description: This template defines resources needed to deploy Thoth Cleanup Job as a Proof-of-Concept to OpenShift.
+    template.openshift.io/long-description: >
+      This template defines resources needed to deploy Thoth Cleanup Job as a Proof-of-Concept to OpenShift.
     template.openshift.io/provider-display-name: Red Hat, Inc.
   labels:
     template: cleanup-cronjob
@@ -16,49 +17,53 @@ metadata:
     component: cleanup
 
 objects:
-- apiVersion: batch/v2alpha1
-  kind: CronJob
-  metadata:
-    name: cleanup
-    labels:
-      app: thoth
-      component: cleanup
-  spec:
-    schedule: "@daily"
-    suspend: ${{THOTH_SUSPEND_JOB}}
-    successfulJobsHistoryLimit: 4
-    failedJobsHistoryLimit: 1
-    concurrencyPolicy: Forbid
-    jobTemplate:
-      spec:
-        template:
-          metadata:
-            name: cleanup
-            labels:
-              app: thoth
-              component: cleanup
-          spec:
-            serviceAccountName: analyzer
-            containers:
-            - image: cleanup-job
+  - apiVersion: batch/v2alpha1
+    kind: CronJob
+    metadata:
+      name: cleanup
+      labels:
+        app: thoth
+        component: cleanup
+    spec:
+      schedule: "@daily"
+      suspend: ${{THOTH_SUSPEND_JOB}}
+      successfulJobsHistoryLimit: 4
+      failedJobsHistoryLimit: 1
+      concurrencyPolicy: Forbid
+      jobTemplate:
+        spec:
+          template:
+            metadata:
               name: cleanup
-              env:
-               - name: THOTH_LOG_CLEANUP_JOB
-                 value: 'DEBUG'
-               - name: THOTH_CLEANUP_NAMESPACE
-                 # TODO: we should have a cleanup job per namespace that should be cleaned - middletier, backend, amun
-                 valueFrom:
-                   configMapKeyRef:
-                     key: middletier-namespace
-                     name: thoth
-              resources:
-                requests:
-                  memory: "32Mi"
-                  cpu: "100m"
-                limits:
-                  memory: "128Mi"
-                  cpu: "250m"
-            restartPolicy: OnFailure
+              labels:
+                app: thoth
+                component: cleanup
+            spec:
+              serviceAccountName: analyzer
+              containers:
+                - image: cleanup-job
+                  name: cleanup
+                  env:
+                    - name: THOTH_LOG_CLEANUP_JOB
+                      value: 'DEBUG'
+                    - name: THOTH_CLEANUP_NAMESPACE
+                      valueFrom:
+                        configMapKeyRef:
+                          key: middletier-namespace
+                          name: thoth
+                    - name: THOTH_METRICS_PUSHGATEWAY_URL
+                      valueFrom:
+                        configMapKeyRef:
+                          name: thoth
+                          key: metrics-pushgateway-url
+                  resources:
+                    requests:
+                      memory: "32Mi"
+                      cpu: "100m"
+                    limits:
+                      memory: "128Mi"
+                      cpu: "250m"
+              restartPolicy: OnFailure
 
 parameters:
   - displayName: Suspend CronJob run
