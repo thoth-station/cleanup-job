@@ -52,9 +52,7 @@ _THOTH_METRICS_PUSHGATEWAY_URL = os.getenv("THOTH_METRICS_PUSHGATEWAY_URL")
 _METRIC_RUNTIME = Gauge(
     "thoth_cleanup_job_runtime_seconds", "Runtime of cleanup job in seconds.", [], registry=_PROMETHEUS_REGISTRY
 )
-_METRIC_JOBS = Counter(
-    "thoth_cleanup_jobs", "Jobs cleaned up.", ["env", "op"], registry=_PROMETHEUS_REGISTRY
-)
+_METRIC_JOBS = Counter("thoth_cleanup_jobs", "Jobs cleaned up.", ["env", "op"], registry=_PROMETHEUS_REGISTRY)
 _METRIC_BUILDCONFIGS = Counter(
     "thoth_cleanup_buildconfigs", "Buildconfigs cleaned up.", ["env", "op"], registry=_PROMETHEUS_REGISTRY
 )
@@ -82,15 +80,13 @@ def _do_cleanup(cleanup_namespace: str) -> None:
     now = datetime.datetime.now(datetime.timezone.utc)
 
     for resource_version, resource_type, creation_delete, metric in _RESOURCES:
-        resources = dyn_client.resources.get(
-            api_version=resource_version, kind=resource_type
-        )
+        resources = dyn_client.resources.get(api_version=resource_version, kind=resource_type)
         for item in resources.get(label_selector=_CLEANUP_LABEL_SELECTOR, namespace=cleanup_namespace).items:
             _LOGGER.debug(
                 "Checking expiration of resource %r from namespace %r of kind %r",
                 item.metadata.name,
                 cleanup_namespace,
-                resources.kind
+                resources.kind,
             )
 
             ttl = item.metadata.ttl
@@ -102,7 +98,7 @@ def _do_cleanup(cleanup_namespace: str) -> None:
                     ttl,
                     item.metadata.name,
                     resources.kind,
-                    cleanup_namespace
+                    cleanup_namespace,
                 )
                 continue
 
@@ -111,7 +107,7 @@ def _do_cleanup(cleanup_namespace: str) -> None:
                     _LOGGER.info(
                         "Skipping resource %r of type %r- no creation timestsamp found in metadata",
                         item.metadata.name,
-                        resources.type
+                        resources.type,
                     )
                     continue
                 created_str = item.metadata.creationTimestamp
@@ -120,7 +116,7 @@ def _do_cleanup(cleanup_namespace: str) -> None:
                     _LOGGER.info(
                         "Skipping resource %r of type %r- no completion time found in status field",
                         item.metadata.name,
-                        resources.kind
+                        resources.kind,
                     )
                     continue
                 created_str = item.status.completionTime
@@ -134,7 +130,7 @@ def _do_cleanup(cleanup_namespace: str) -> None:
                     item.metadata.name,
                     resources.kind,
                     cleanup_namespace,
-                    created_str
+                    created_str,
                 )
                 try:
                     resources.delete(name=item.metadata.name, namespace=cleanup_namespace)
@@ -144,14 +140,14 @@ def _do_cleanup(cleanup_namespace: str) -> None:
                         "Failed to delete resource %r of type %r in namespace %r",
                         item.metadata.name,
                         resources.kind,
-                        cleanup_namespace
+                        cleanup_namespace,
                     )
             else:
                 _LOGGER.info(
                     "Keeping resource %r of type %r in namespace %r ttl not expired yet",
                     item.metadata.name,
                     resources.kind,
-                    cleanup_namespace
+                    cleanup_namespace,
                 )
 
 
@@ -178,8 +174,8 @@ def cli(cleanup_namespace: str, verbose: bool = False):
         finally:
             if _THOTH_METRICS_PUSHGATEWAY_URL:
                 try:
-                    _LOGGER.info("Submitting metrics to Prometheus pushgateway %r", THOTH_METRICS_PUSHGATEWAY_URL)
-                    push_to_gateway(THOTH_METRICS_PUSHGATEWAY_URL, job="cleanup", registry=_PROMETHEUS_REGISTRY)
+                    _LOGGER.info("Submitting metrics to Prometheus pushgateway %r", _THOTH_METRICS_PUSHGATEWAY_URL)
+                    push_to_gateway(_THOTH_METRICS_PUSHGATEWAY_URL, job="cleanup", registry=_PROMETHEUS_REGISTRY)
                 except Exception as exc:
                     _LOGGER.exception("An error occurred pushing the metrics: %s", exc)
 
