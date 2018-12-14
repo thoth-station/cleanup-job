@@ -38,7 +38,7 @@ from thoth.common import init_logging
 from thoth.common import __version__ as __common__version__
 
 
-__version__ = f"0.6.2+common.{__common__version__}"
+__version__ = f"0.7.0+common.{__common__version__}"
 
 
 init_logging()
@@ -51,6 +51,9 @@ _PROMETHEUS_REGISTRY = CollectorRegistry()
 _THOTH_METRICS_PUSHGATEWAY_URL = os.getenv("THOTH_METRICS_PUSHGATEWAY_URL")
 _METRIC_RUNTIME = Gauge(
     "thoth_cleanup_job_runtime_seconds", "Runtime of cleanup job in seconds.", [], registry=_PROMETHEUS_REGISTRY
+)
+_METRIC_INFO = Gauge(
+    "thoth_cleanup_job_info", "Thoth Cleanup Job information", ["version"], registry=_PROMETHEUS_REGISTRY
 )
 _METRIC_JOBS = Counter("thoth_cleanup_jobs", "Jobs cleaned up.", ["env", "op"], registry=_PROMETHEUS_REGISTRY)
 _METRIC_BUILDCONFIGS = Counter(
@@ -167,6 +170,7 @@ def cli(cleanup_namespace: str, verbose: bool = False):
 
     _LOGGER.info("Thoth Cleanup Job v%s starting...", __version__)
     _LOGGER.info("Cleanup will be performed in namespace %r", cleanup_namespace)
+    _METRIC_INFO.labels(__version__).inc()
 
     with _METRIC_RUNTIME.time():
         try:
