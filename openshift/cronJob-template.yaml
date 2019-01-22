@@ -20,7 +20,7 @@ objects:
   - apiVersion: batch/v2alpha1
     kind: CronJob
     metadata:
-      name: cleanup
+      name: "cleanup-${THOTH_CLEANUP_NAMESPACE}"
       labels:
         app: thoth
         component: cleanup
@@ -45,12 +45,9 @@ objects:
                   name: cleanup
                   env:
                     - name: THOTH_LOG_CLEANUP_JOB
-                      value: 'DEBUG'
+                      value: 'INFO'
                     - name: THOTH_CLEANUP_NAMESPACE
-                      valueFrom:
-                        configMapKeyRef:
-                          key: middletier-namespace
-                          name: thoth
+                      value: "${THOTH_CLEANUP_NAMESPACE}"
                     - name: THOTH_METRICS_PUSHGATEWAY_URL
                       valueFrom:
                         configMapKeyRef:
@@ -71,3 +68,8 @@ parameters:
     required: true
     name: THOTH_SUSPEND_JOB
     value: "true"
+
+  - displayName: Cleanup namespace
+    description: Namespace that should be cleaned with job.
+    required: true
+    name: THOTH_CLEANUP_NAMESPACE
