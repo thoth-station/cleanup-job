@@ -7,7 +7,7 @@ metadata:
       This is Thoth CleanUp CronJob BuildConfig, this template is meant to be used by Bots,
       but could also be used by humans...
     openshift.io/display-name: Thoth User API BuildConfig
-    version: 0.6.0
+    version: 0.8.0
     tags: thoth,ai-stacks,aistacks
     template.openshift.io/documentation-url: https://github.com/AICoE/Thoth/
     template.openshift.io/long-description: >
@@ -19,62 +19,62 @@ metadata:
     app: thoth
     component: cleanup
 
-objects:
-- apiVersion: v1
-  kind: BuildConfig
-  metadata:
-    labels:
-      app: thoth
-      component: cleanup
-    name: cleanup-job
-  spec:
-    resources:
-      limits:
-        cpu: 1
-        memory: 1Gi
-      requests:
-        cpu: 1
-        memory: 512Mi
-    output:
-      to:
-        kind: ImageStreamTag
-        name: "cleanup-job:${IMAGE_STREAM_TAG}"
-    runPolicy: Serial
-    source:
-      git:
-        uri: ${GITHUB_URL}
-        ref: ${GITHUB_REF}
-      type: Git
-    strategy:
-      type: Source
-      sourceStrategy:
-        from:
-          kind: ImageStreamTag
-          name: python-36-centos7:latest
-        env:
-        - name: ENABLE_PIPENV
-          value: '1'
-        - name: UPGRADE_PIP_TO_LATEST
-          value: ''
-    triggers:
-    - imageChange: {}
-      type: ImageChange
-
 parameters:
-- description: Git repository for Thoth's User API
-  displayName: Thoth user-api git repository
-  required: true
-  name: GITHUB_URL
-  value: 'https://github.com/thoth-station/cleanup-job'
+  - description: Git repository for Thoth's User API
+    displayName: Thoth user-api git repository
+    required: true
+    name: GITHUB_URL
+    value: "https://github.com/thoth-station/cleanup-job"
 
-- description: Git repository for Thoth's User API
-  displayName: Thoth user-api git reference
-  required: true
-  name: GITHUB_REF
-  value: 'master'
+  - description: Git repository for Thoth's User API
+    displayName: Thoth user-api git reference
+    required: true
+    name: GITHUB_REF
+    value: "master"
 
-- description: Tag of the output ImageStream the resulting container image should go to
-  displayName: ImageStream Tag
-  required: true
-  name: IMAGE_STREAM_TAG
-  value: 'latest'
+  - description: Tag of the output ImageStream the resulting container image should go to
+    displayName: ImageStream Tag
+    required: true
+    name: IMAGE_STREAM_TAG
+    value: "latest"
+
+objects:
+  - apiVersion: v1
+    kind: BuildConfig
+    metadata:
+      labels:
+        app: thoth
+        component: cleanup
+      name: cleanup-job
+    spec:
+      resources:
+        limits:
+          cpu: 1
+          memory: 1Gi
+        requests:
+          cpu: 1
+          memory: 512Mi
+      output:
+        to:
+          kind: ImageStreamTag
+          name: "cleanup-job:${IMAGE_STREAM_TAG}"
+      runPolicy: Serial
+      source:
+        git:
+          uri: "${GITHUB_URL}"
+          ref: "${GITHUB_REF}"
+        type: Git
+      strategy:
+        type: Source
+        sourceStrategy:
+          from:
+            kind: ImageStreamTag
+            name: python-36-centos7:latest
+          env:
+            - name: ENABLE_PIPENV
+              value: "1"
+            - name: UPGRADE_PIP_TO_LATEST
+              value: ""
+      triggers:
+        - imageChange: {}
+          type: ImageChange

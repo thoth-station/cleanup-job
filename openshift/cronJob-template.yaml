@@ -3,32 +3,60 @@ kind: Template
 metadata:
   name: cleanup-cronjob
   annotations:
-    description: This is Thoth Core - Cleanup Job
+    description: "This is Thoth Core - Cleanup Job"
     openshift.io/display-name: "Thoth: Cleanup Job"
-    version: 0.7.1
+    version: 0.8.0
     tags: thoth,ai-stacks,aistacks,thoth-ops
     template.openshift.io/documentation-url: https://github.com/Thoth-Station/
     template.openshift.io/long-description: >
-      This template defines resources needed to deploy Thoth Cleanup Job as a Proof-of-Concept to OpenShift.
-    template.openshift.io/provider-display-name: Red Hat, Inc.
+      This template defines resources needed to deploy Thoth Cleanup Job to OpenShift.
+    template.openshift.io/provider-display-name: "Red Hat, Inc."
   labels:
     template: cleanup-cronjob
     app: thoth
     component: cleanup
 
+parameters:
+  - description: Project the ImageStream to be use lives in
+    displayName: ImageStream Project
+    required: true
+    name: IMAGE_STREAM_PROJECT_NAME
+
+  - description: Tag of the ImageStream to be use
+    displayName: ImageStream Tag
+    required: true
+    name: IMAGE_STREAM_TAG
+    value: "latest"
+
+  - description: Service account to be used which allows ... in operated project.
+    displayName: Service account name
+    required: true
+    name: SERVICE_ACCOUNT_NAME
+
+  - displayName: Suspend CronJob
+    description: create a suspended CronJob by default.
+    required: true
+    name: SUSPEND_JOB
+    value: "true"
+
+  - displayName: Cleanup namespace
+    description: Namespace that should be cleaned with job.
+    required: true
+    name: CLEANUP_PROJECT_NAME
+
 objects:
   - apiVersion: batch/v2alpha1
     kind: CronJob
     metadata:
-      name: "cleanup-${THOTH_CLEANUP_NAMESPACE}"
+      name: "cleanup-${CLEANUP_PROJECT_NAME}"
       labels:
         app: thoth
         component: cleanup
     spec:
       schedule: "@daily"
-      suspend: ${{THOTH_SUSPEND_JOB}}
-      successfulJobsHistoryLimit: 4
-      failedJobsHistoryLimit: 1
+      suspend: ${{SUSPEND_JOB}}
+      successfulJobsHistoryLimit: 1
+      failedJobsHistoryLimit: 2
       concurrencyPolicy: Forbid
       jobTemplate:
         spec:
@@ -39,15 +67,15 @@ objects:
                 app: thoth
                 component: cleanup
             spec:
-              serviceAccountName: analyzer
+              serviceAccountName: "${SERVICE_ACCOUNT_NAME}"
               containers:
-                - image: cleanup-job
-                  name: cleanup
+                - name: cleanup
+                  image: "{IMAGE_STREAM_PROJECT_NAME}/cleanup-job"
                   env:
                     - name: THOTH_LOG_CLEANUP_JOB
-                      value: 'INFO'
+                      value: "INFO"
                     - name: THOTH_CLEANUP_NAMESPACE
-                      value: "${THOTH_CLEANUP_NAMESPACE}"
+                      value: "${CLEANUP_PROJECT_NAME}"
                     - name: THOTH_METRICS_PUSHGATEWAY_URL
                       valueFrom:
                         configMapKeyRef:
@@ -76,15 +104,3 @@ objects:
                       memory: "128Mi"
                       cpu: "250m"
               restartPolicy: OnFailure
-
-parameters:
-  - displayName: Suspend CronJob run
-    description: Suspend CronJob run
-    required: true
-    name: THOTH_SUSPEND_JOB
-    value: "true"
-
-  - displayName: Cleanup namespace
-    description: Namespace that should be cleaned with job.
-    required: true
-    name: THOTH_CLEANUP_NAMESPACE
