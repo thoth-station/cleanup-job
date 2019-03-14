@@ -70,7 +70,7 @@ objects:
               serviceAccountName: "${SERVICE_ACCOUNT_NAME}"
               containers:
                 - name: cleanup
-                  image: "{IMAGE_STREAM_PROJECT_NAME}/cleanup-job"
+                  image: "${IMAGE_STREAM_PROJECT_NAME}/cleanup-job"
                   env:
                     - name: THOTH_LOG_CLEANUP_JOB
                       value: "INFO"
