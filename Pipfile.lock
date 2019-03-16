@@ -363,10 +363,10 @@
         },
         "thoth-common": {
             "hashes": [
-                "sha256:3d600f23342a80170bdd27f3384f1c13ffa1a8152f00e0ec2aa85dea45cc3ac5"
+                "sha256:ec1987ee0fceaf7829c05ef86b2d32b613730e7fcdb595ced595e99eb96a52dc"
             ],
             "index": "pypi",
-            "version": "==0.8.0"
+            "version": "==0.8.1"
         },
         "tzlocal": {
             "hashes": [
