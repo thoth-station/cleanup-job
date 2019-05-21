@@ -22,6 +22,11 @@ parameters:
     required: true
     name: IMAGE_STREAM_PROJECT_NAME
 
+  - name: IMAGE_REGISTRY
+    description: Registry server from where Image is to be pulled
+    displayName: Registry
+    required: true
+
   - description: Tag of the ImageStream to be use
     displayName: ImageStream Tag
     required: true
@@ -70,7 +75,7 @@ objects:
               serviceAccountName: "${SERVICE_ACCOUNT_NAME}"
               containers:
                 - name: cleanup
-                  image: "${IMAGE_STREAM_PROJECT_NAME}/cleanup-job"
+                  image: "${IMAGE_REGISTRY}/${IMAGE_STREAM_PROJECT_NAME}/cleanup-job"
                   env:
                     - name: THOTH_LOG_CLEANUP_JOB
                       value: "INFO"
