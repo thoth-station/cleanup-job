@@ -78,3 +78,7 @@ objects:
       triggers:
         - imageChange: {}
           type: ImageChange
+        - type: "Generic"
+          generic:
+            secretReference:
+              name: generic-webhook-secret
