@@ -10,7 +10,7 @@ python-dateutil = "*"
 openshift = "*"
 kubernetes = "*"
 thoth-common = "*"
-prometheus-client = "*"
+prometheus-client = "<0.7.0"
 
 [dev-packages]
 
