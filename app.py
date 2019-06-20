@@ -92,7 +92,7 @@ def _do_cleanup(cleanup_namespace: str) -> None:
                 resources.kind,
             )
 
-            ttl = item.metadata.ttl
+            ttl = item.metadata.labels.ttl
             try:
                 parsed_ttl = parse_ttl(ttl) if ttl else _DEFAULT_TTL
             except Exception as exc:
@@ -147,10 +147,12 @@ def _do_cleanup(cleanup_namespace: str) -> None:
                     )
             else:
                 _LOGGER.info(
-                    "Keeping resource %r of type %r in namespace %r ttl not expired yet",
+                    "Keeping resource %r of type %r in namespace %r ttl not expired yet (lived for %r, ttl is %r)",
                     item.metadata.name,
                     resources.kind,
                     cleanup_namespace,
+                    lived_for,
+                    parsed_ttl,
                 )
 
 
