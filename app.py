@@ -48,7 +48,7 @@ _LOGGER = logging.getLogger("thoth.cleanup_job")
 _DEFAULT_TTL = parse_ttl(os.getenv("THOTH_CLEANUP_DEFAULT_TTL") or "7d")
 _CLEANUP_LABEL_SELECTOR = "mark=cleanup"
 _PROMETHEUS_REGISTRY = CollectorRegistry()
-_THOTH_METRICS_PUSHGATEWAY_URL = os.getenv("THOTH_METRICS_PUSHGATEWAY_URL")
+_THOTH_METRICS_PUSHGATEWAY_URL = os.getenv("PROMETHEUS_PUSHGATEWAY_URL")
 _METRIC_RUNTIME = Gauge(
     "thoth_cleanup_job_runtime_seconds", "Runtime of cleanup job in seconds.", [], registry=_PROMETHEUS_REGISTRY
 )
