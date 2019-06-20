@@ -65,12 +65,16 @@ _METRIC_IMAGESTREAMS = Counter(
 _METRIC_CONFIGMAPS = Counter(
     "thoth_cleanup_job_configmaps", "Configmaps cleaned up.", ["env", "op"], registry=_PROMETHEUS_REGISTRY
 )
+_METRIC_PODS = Counter(
+    "thoth_cleanup_job_pods", "Pods cleaned up.", registry=_PROMETHEUS_REGISTRY
+)
 _RESOURCES = frozenset(
     (
         # apiVersion, Type, delete based on creation (if false, take completionTime in status), metric to report to
         ("build.openshift.io/v1", "BuildConfig", True, _METRIC_BUILDCONFIGS),
         ("image.openshift.io/v1", "ImageStream", True, _METRIC_IMAGESTREAMS),
         ("v1", "ConfigMap", True, _METRIC_CONFIGMAPS),
+        ("v1", "Pod", True, _METRIC_PODS),
         ("batch/v1", "Job", False, _METRIC_JOBS),
     )
 )
