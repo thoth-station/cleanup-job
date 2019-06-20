@@ -26,15 +26,13 @@ import sys
 from dateutil.parser import parse as datetime_parser
 import click
 from pytimeparse import parse as parse_ttl
-from kubernetes import client
-from kubernetes import config
-from openshift.dynamic import DynamicClient
 from prometheus_client import CollectorRegistry
 from prometheus_client import Gauge
 from prometheus_client import Counter
 from prometheus_client import push_to_gateway
 
 from thoth.common import init_logging
+from thoth.common import OpenShift
 from thoth.common import __version__ as __common__version__
 
 
@@ -78,12 +76,11 @@ _RESOURCES = frozenset(
 
 def _do_cleanup(cleanup_namespace: str) -> None:
     """Perform the actual cleanup."""
-    config.load_incluster_config()
-    dyn_client = DynamicClient(client.ApiClient(configuration=client.Configuration()))
+    openshift = OpenShift()
     now = datetime.datetime.now(datetime.timezone.utc)
 
     for resource_version, resource_type, creation_delete, metric in _RESOURCES:
-        resources = dyn_client.resources.get(api_version=resource_version, kind=resource_type)
+        resources = openshift.ocp_client.resources.get(api_version=resource_version, kind=resource_type)
         for item in resources.get(label_selector=_CLEANUP_LABEL_SELECTOR, namespace=cleanup_namespace).items:
             _LOGGER.debug(
                 "Checking expiration of resource %r from namespace %r of kind %r",
