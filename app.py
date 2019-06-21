@@ -53,27 +53,20 @@ _METRIC_RUNTIME = Gauge(
 _METRIC_INFO = Gauge(
     "thoth_cleanup_job_info", "Thoth Cleanup Job information", ["version"], registry=_PROMETHEUS_REGISTRY
 )
-_METRIC_JOBS = Counter("thoth_cleanup_jobs", "Jobs cleaned up.", ["env", "op"], registry=_PROMETHEUS_REGISTRY)
-_METRIC_BUILDCONFIGS = Counter(
-    "thoth_cleanup_job_buildconfigs", "Buildconfigs cleaned up.", ["env", "op"], registry=_PROMETHEUS_REGISTRY
-)
-_METRIC_IMAGESTREAMS = Counter(
-    "thoth_cleanup_job_imagestreams", "Imagestreams cleaned up.", ["env", "op"], registry=_PROMETHEUS_REGISTRY
-)
-_METRIC_CONFIGMAPS = Counter(
-    "thoth_cleanup_job_configmaps", "Configmaps cleaned up.", ["env", "op"], registry=_PROMETHEUS_REGISTRY
+_METRIC_DELETED_OBJECTS = Counter(
+        "thoth_cleanup_objects", "Cluster objects cleaned up.", ["namespace", "component"], registry=_PROMETHEUS_REGISTRY
 )
 _METRIC_PODS = Counter(
     "thoth_cleanup_job_pods", "Pods cleaned up.", registry=_PROMETHEUS_REGISTRY
 )
 _RESOURCES = frozenset(
     (
-        # apiVersion, Type, delete based on creation (if false, take completionTime in status), metric to report to
-        ("build.openshift.io/v1", "BuildConfig", True, _METRIC_BUILDCONFIGS),
-        ("image.openshift.io/v1", "ImageStream", True, _METRIC_IMAGESTREAMS),
-        ("v1", "ConfigMap", True, _METRIC_CONFIGMAPS),
-        ("v1", "Pod", True, _METRIC_PODS),
-        ("batch/v1", "Job", False, _METRIC_JOBS),
+        # apiVersion, Type, delete based on creation (if false, take completionTime in status)
+        ("build.openshift.io/v1", "BuildConfig", True),
+        ("image.openshift.io/v1", "ImageStream", True),
+        ("v1", "ConfigMap", True),
+        ("v1", "Pod", True),
+        ("batch/v1", "Job", False),
     )
 )
 
@@ -138,7 +131,7 @@ def _do_cleanup(cleanup_namespace: str) -> None:
                 )
                 try:
                     resources.delete(name=item.metadata.name, namespace=cleanup_namespace)
-                    metric.inc()
+                    _METRIC_DELETED_OBJECTS.labels(namespace=cleanup_namespace, component=item.metadata.labels.component).inc()
                 except Exception as exc:
                     _LOGGER.exception(
                         "Failed to delete resource %r of type %r in namespace %r",
