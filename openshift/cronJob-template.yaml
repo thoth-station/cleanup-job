@@ -63,6 +63,7 @@ objects:
       successfulJobsHistoryLimit: 1
       failedJobsHistoryLimit: 2
       concurrencyPolicy: Forbid
+      startingDeadlineSeconds: 5000000
       jobTemplate:
         spec:
           template:
