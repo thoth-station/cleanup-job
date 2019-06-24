@@ -53,17 +53,46 @@ _METRIC_RUNTIME = Gauge(
 _METRIC_INFO = Gauge(
     "thoth_cleanup_job_info", "Thoth Cleanup Job information", ["version"], registry=_PROMETHEUS_REGISTRY
 )
-_METRIC_DELETED_OBJECTS = Counter(
-    "thoth_cleanup_objects", "Cluster objects cleaned up.", ["namespace", "component", "resource"], registry=_PROMETHEUS_REGISTRY
+
+_METRIC_DELETED_BUILDCONFIGS = Counter(
+    "thoth_cleanup_job_buildconfigs",
+    "Buildconfigs cleaned up.",
+    ["namespace", "component", "resource"],
+    registry=_PROMETHEUS_REGISTRY,
 )
+_METRIC_DELETED_IMAGESTREAMS = Counter(
+    "thoth_cleanup_job_imagestreams",
+    "Imagestreams cleaned up.",
+    ["namespace", "component", "resource"],
+    registry=_PROMETHEUS_REGISTRY,
+)
+_METRIC_DELETED_CONFIGMAPS = Counter(
+    "thoth_cleanup_job_configmaps",
+    "Configmaps cleaned up.",
+    ["namespace", "component", "resource"],
+    registry=_PROMETHEUS_REGISTRY,
+)
+_METRIC_DELETED_PODS = Counter(
+    "thoth_cleanup_job_pods",
+    "Pods cleaned up.",
+    ["namespace", "component", "resource"],
+    registry=_PROMETHEUS_REGISTRY
+)
+_METRIC_DELETED_JOBS = Counter(
+    "thoth_cleanup_jobs",
+    "Jobs cleaned up.",
+    ["namespace", "component", "resource"],
+    registry=_PROMETHEUS_REGISTRY
+)
+
 _RESOURCES = frozenset(
     (
         # apiVersion, Type, delete based on creation (if false, take completionTime in status)
-        ("build.openshift.io/v1", "BuildConfig", True),
-        ("image.openshift.io/v1", "ImageStream", True),
-        ("v1", "ConfigMap", True),
-        ("v1", "Pod", True),
-        ("batch/v1", "Job", False),
+        ("build.openshift.io/v1", "BuildConfig", True, _METRIC_DELETED_BUILDCONFIGS),
+        ("image.openshift.io/v1", "ImageStream", True, _METRIC_DELETED_IMAGESTREAMS),
+        ("v1", "ConfigMap", True, _METRIC_DELETED_CONFIGMAPS),
+        ("v1", "Pod", True, _METRIC_DELETED_PODS),
+        ("batch/v1", "Job", False, _METRIC_DELETED_JOBS),
     )
 )
 
@@ -73,7 +102,7 @@ def _do_cleanup(cleanup_namespace: str) -> None:
     openshift = OpenShift()
     now = datetime.datetime.now(datetime.timezone.utc)
 
-    for resource_version, resource_type, creation_delete in _RESOURCES:
+    for resource_version, resource_type, creation_delete, metric in _RESOURCES:
         resources = openshift.ocp_client.resources.get(api_version=resource_version, kind=resource_type)
         for item in resources.get(label_selector=_CLEANUP_LABEL_SELECTOR, namespace=cleanup_namespace).items:
             _LOGGER.debug(
@@ -128,7 +157,7 @@ def _do_cleanup(cleanup_namespace: str) -> None:
                 )
                 try:
                     resources.delete(name=item.metadata.name, namespace=cleanup_namespace)
-                    _METRIC_DELETED_OBJECTS.labels(
+                    metric.labels(
                         namespace=cleanup_namespace, component=item.metadata.labels.component, resource=resource_type
                     ).inc()
                 except Exception as exc:
