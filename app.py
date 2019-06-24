@@ -54,7 +54,7 @@ _METRIC_INFO = Gauge(
     "thoth_cleanup_job_info", "Thoth Cleanup Job information", ["version"], registry=_PROMETHEUS_REGISTRY
 )
 _METRIC_DELETED_OBJECTS = Counter(
-    "thoth_cleanup_objects", "Cluster objects cleaned up.", ["namespace", "component"], registry=_PROMETHEUS_REGISTRY
+    "thoth_cleanup_objects", "Cluster objects cleaned up.", ["namespace", "component", "resource"], registry=_PROMETHEUS_REGISTRY
 )
 _RESOURCES = frozenset(
     (
@@ -129,7 +129,7 @@ def _do_cleanup(cleanup_namespace: str) -> None:
                 try:
                     resources.delete(name=item.metadata.name, namespace=cleanup_namespace)
                     _METRIC_DELETED_OBJECTS.labels(
-                        namespace=cleanup_namespace, component=item.metadata.labels.component
+                        namespace=cleanup_namespace, component=item.metadata.labels.component, resource=resource_type
                     ).inc()
                 except Exception as exc:
                     _LOGGER.exception(
