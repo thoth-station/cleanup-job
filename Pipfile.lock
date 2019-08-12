@@ -89,11 +89,11 @@
         },
         "kubernetes": {
             "hashes": [
-                "sha256:a8b0aed55ba946faea660712595a52ae53a8854df773d96f47a63fa0c9d4e3bf",
-                "sha256:f56137a298cb1453dd908b49dd4169347287c971e8cabd11b32f27570fec314c"
+                "sha256:eb95331512c2e9206c85b62788f82cc2d51cfb96420d4ef18f007ec1b9d87f0a",
+                "sha256:ec360d9bae6ac67081f81bca23870822a5ff1508dffad6f20a5a2a03f20032c5"
             ],
             "index": "pypi",
-            "version": "==9.0.0"
+            "version": "==9.0.1"
         },
         "markupsafe": {
             "hashes": [
@@ -240,10 +240,10 @@
         },
         "ruamel.yaml": {
             "hashes": [
-                "sha256:4c1dbad22790b5ea8587c2a0cae97ebc7a9d0d88de5d0edb70dea2eab7d8534a",
-                "sha256:eb4b1ffd095785c50f110118cb6f7bb9cd011ecc013b014436d38b7f8fb7afa9"
+                "sha256:547aeab5c51c93bc750ed2a320c1559b605bde3aa569216aa75fd91d8a1c4623",
+                "sha256:c5e239b6a4f26baabb2e22b145582a7d99ae9d4ebb8902291365a61ed38faa7f"
             ],
-            "version": "==0.16.0"
+            "version": "==0.16.1"
         },
         "ruamel.yaml.clib": {
             "hashes": [
