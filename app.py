@@ -105,76 +105,86 @@ def _do_cleanup(cleanup_namespace: str) -> None:
     for resource_version, resource_type, creation_delete, metric in _RESOURCES:
         resources = openshift.ocp_client.resources.get(api_version=resource_version, kind=resource_type)
         for item in resources.get(label_selector=_CLEANUP_LABEL_SELECTOR, namespace=cleanup_namespace).items:
-            _LOGGER.debug(
-                "Checking expiration of resource %r from namespace %r of kind %r",
-                item.metadata.name,
-                cleanup_namespace,
-                resources.kind,
-            )
-
-            ttl = item.metadata.labels.ttl
-            try:
-                parsed_ttl = parse_ttl(ttl) if ttl else _DEFAULT_TTL
-            except Exception as exc:
-                _LOGGER.exception(
-                    "Failed to parse TTL %r for resource %r of type %r in namespace %r the object will not be deleted",
-                    ttl,
+            if item.status.phase == "Succeeded":
+                _LOGGER.debug(
+                    "Checking expiration of resource %r from namespace %r of kind %r",
                     item.metadata.name,
-                    resources.kind,
                     cleanup_namespace,
-                )
-                continue
-
-            if creation_delete:
-                if not item.metadata.creationTimestamp:
-                    _LOGGER.info(
-                        "Skipping resource %r of type %r- no creation timestsamp found in metadata",
-                        item.metadata.name,
-                        resources.type,
-                    )
-                    continue
-                created_str = item.metadata.creationTimestamp
-            else:
-                if not item.status.completionTime:
-                    _LOGGER.info(
-                        "Skipping resource %r of type %r- no completion time found in status field",
-                        item.metadata.name,
-                        resources.kind,
-                    )
-                    continue
-                created_str = item.status.completionTime
-
-            created = datetime_parser(created_str)
-            lived_for = (now - created).total_seconds()
-
-            if lived_for > parsed_ttl:
-                _LOGGER.info(
-                    "Deleting resource %r of type %r in namespace %r - created at %r",
-                    item.metadata.name,
                     resources.kind,
-                    cleanup_namespace,
-                    created_str,
                 )
+
+                ttl = item.metadata.labels.ttl
                 try:
-                    resources.delete(name=item.metadata.name, namespace=cleanup_namespace)
-                    metric.labels(
-                        namespace=cleanup_namespace, component=item.metadata.labels.component, resource=resource_type
-                    ).inc()
+                    parsed_ttl = parse_ttl(ttl) if ttl else _DEFAULT_TTL
                 except Exception as exc:
                     _LOGGER.exception(
-                        "Failed to delete resource %r of type %r in namespace %r",
+                        "Failed to parse TTL %r for resource %r of type %r in namespace %r the object will not be "
+                        "deleted",
+                        ttl,
                         item.metadata.name,
                         resources.kind,
                         cleanup_namespace,
                     )
+                    continue
+
+                if creation_delete:
+                    if not item.metadata.creationTimestamp:
+                        _LOGGER.info(
+                            "Skipping resource %r of type %r- no creation timestsamp found in metadata",
+                            item.metadata.name,
+                            resources.type,
+                        )
+                        continue
+                    created_str = item.metadata.creationTimestamp
+                else:
+                    if not item.status.completionTime:
+                        _LOGGER.info(
+                            "Skipping resource %r of type %r- no completion time found in status field",
+                            item.metadata.name,
+                            resources.kind,
+                        )
+                        continue
+                    created_str = item.status.completionTime
+
+                created = datetime_parser(created_str)
+                lived_for = (now - created).total_seconds()
+
+                if lived_for > parsed_ttl:
+                    _LOGGER.info(
+                        "Deleting resource %r of type %r in namespace %r - created at %r",
+                        item.metadata.name,
+                        resources.kind,
+                        cleanup_namespace,
+                        created_str,
+                    )
+                    try:
+                        resources.delete(name=item.metadata.name, namespace=cleanup_namespace)
+                        metric.labels(
+                            namespace=cleanup_namespace,
+                            component=item.metadata.labels.component,
+                            resource=resource_type
+                        ).inc()
+                    except Exception as exc:
+                        _LOGGER.exception(
+                            "Failed to delete resource %r of type %r in namespace %r",
+                            item.metadata.name,
+                            resources.kind,
+                            cleanup_namespace,
+                        )
+                else:
+                    _LOGGER.info(
+                        "Keeping resource %r of type %r in namespace %r ttl not expired yet (lived for %r, ttl is %r)",
+                        item.metadata.name,
+                        resources.kind,
+                        cleanup_namespace,
+                        lived_for,
+                        parsed_ttl,
+                    )
             else:
                 _LOGGER.info(
-                    "Keeping resource %r of type %r in namespace %r ttl not expired yet (lived for %r, ttl is %r)",
+                    "Skipping resource %r- at phase %r",
                     item.metadata.name,
-                    resources.kind,
-                    cleanup_namespace,
-                    lived_for,
-                    parsed_ttl,
+                    item.status.phase,
                 )
 
 
