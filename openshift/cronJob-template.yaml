@@ -59,7 +59,7 @@ objects:
         app: thoth
         component: cleanup
     spec:
-      schedule: "0 */2 * * *"
+      schedule: "*/10 * * * *"
       suspend: ${{SUSPEND_JOB}}
       successfulJobsHistoryLimit: 1
       failedJobsHistoryLimit: 2
