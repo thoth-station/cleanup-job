@@ -25,6 +25,7 @@ parameters:
   - name: IMAGE_REGISTRY
     description: Registry server from where Image is to be pulled
     displayName: Registry
+    value: "docker-registry.default.svc:5000"
     required: true
 
   - description: Tag of the ImageStream to be use
