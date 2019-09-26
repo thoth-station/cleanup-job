@@ -25,6 +25,7 @@ parameters:
   - name: IMAGE_REGISTRY
     description: Registry server from where Image is to be pulled
     displayName: Registry
+    value: "docker-registry.default.svc:5000"
     required: true
 
   - description: Tag of the ImageStream to be use
@@ -58,7 +59,7 @@ objects:
         app: thoth
         component: cleanup
     spec:
-      schedule: "0 */2 * * *"
+      schedule: "*/10 * * * *"
       suspend: ${{SUSPEND_JOB}}
       successfulJobsHistoryLimit: 1
       failedJobsHistoryLimit: 2
