@@ -73,16 +73,10 @@ _METRIC_DELETED_CONFIGMAPS = Counter(
     registry=_PROMETHEUS_REGISTRY,
 )
 _METRIC_DELETED_PODS = Counter(
-    "thoth_cleanup_job_pods",
-    "Pods cleaned up.",
-    ["namespace", "component", "resource"],
-    registry=_PROMETHEUS_REGISTRY
+    "thoth_cleanup_job_pods", "Pods cleaned up.", ["namespace", "component", "resource"], registry=_PROMETHEUS_REGISTRY
 )
 _METRIC_DELETED_JOBS = Counter(
-    "thoth_cleanup_jobs",
-    "Jobs cleaned up.",
-    ["namespace", "component", "resource"],
-    registry=_PROMETHEUS_REGISTRY
+    "thoth_cleanup_jobs", "Jobs cleaned up.", ["namespace", "component", "resource"], registry=_PROMETHEUS_REGISTRY
 )
 
 _RESOURCES = frozenset(
@@ -105,7 +99,7 @@ def _do_cleanup(cleanup_namespace: str) -> None:
     for resource_version, resource_type, creation_delete, metric in _RESOURCES:
         resources = openshift.ocp_client.resources.get(api_version=resource_version, kind=resource_type)
         for item in resources.get(label_selector=_CLEANUP_LABEL_SELECTOR, namespace=cleanup_namespace).items:
-            if item.status.phase == "Succeeded":
+            if item.status.phase == "Succeeded" or item.status.succeeded == 1:
                 _LOGGER.debug(
                     "Checking expiration of resource %r from namespace %r of kind %r",
                     item.metadata.name,
@@ -162,7 +156,7 @@ def _do_cleanup(cleanup_namespace: str) -> None:
                         metric.labels(
                             namespace=cleanup_namespace,
                             component=item.metadata.labels.component,
-                            resource=resource_type
+                            resource=resource_type,
                         ).inc()
                     except Exception as exc:
                         _LOGGER.exception(
@@ -181,11 +175,7 @@ def _do_cleanup(cleanup_namespace: str) -> None:
                         parsed_ttl,
                     )
             else:
-                _LOGGER.info(
-                    "Skipping resource %r- at phase %r",
-                    item.metadata.name,
-                    item.status.phase,
-                )
+                _LOGGER.info("Skipping resource %r- at phase %r", item.metadata.name, item.status.phase)
 
 
 @click.command()
