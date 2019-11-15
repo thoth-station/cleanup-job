@@ -64,7 +64,7 @@ objects:
     spec:
       schedule: "*/10 * * * *"
       suspend: ${{SUSPEND_JOB}}
-      successfulJobsHistoryLimit: 1
+      successfulJobsHistoryLimit: 2
       failedJobsHistoryLimit: 2
       concurrencyPolicy: Forbid
       startingDeadlineSeconds: null
