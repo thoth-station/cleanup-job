@@ -87,7 +87,7 @@ objects:
                     - name: THOTH_CLEANUP_NAMESPACE
                       value: "${CLEANUP_PROJECT_NAME}"
                     - name: THOTH_CLEANUP_DEFAULT_TTL
-                      value: "2h"
+                      value: "10m"
                     - name: PROMETHEUS_PUSHGATEWAY_URL
                       valueFrom:
                         configMapKeyRef:
