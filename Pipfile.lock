@@ -306,10 +306,11 @@
         },
         "thoth-common": {
             "hashes": [
-                "sha256:45e1c4047bd8ea5a18aa0424c2fe613242f9f7c35c58d47921f692537f8e6568"
+                "sha256:2d3c61ed083ac359811c92910c530cb3add80ee24ffed2875298dfbc87d4dc0c",
+                "sha256:301a5ef19707e8d9c6f2eb17153d7d07506aed19a58ffe944a0b34ef63651d6d"
             ],
             "index": "pypi",
-            "version": "==0.9.16"
+            "version": "==0.9.18"
         },
         "tzlocal": {
             "hashes": [
