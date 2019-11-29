@@ -103,11 +103,11 @@
         },
         "kubernetes": {
             "hashes": [
-                "sha256:cbf217c5988516f79dec14f82a228f9897817717b7a53c538f84adf5217b9ca7",
-                "sha256:ef2b6d53708cf7f8864e6775fb45e3f76a92607785c422034d7e1d1063399597"
+                "sha256:3770a496663396ad1def665eeadb947b3f45217a08b64b10c01a57e981ac8592",
+                "sha256:a6dee02a1b39ea4bb9c4c2cc415ea0ada33d8ea0a920f7d4fb6d166989dcac01"
             ],
             "index": "pypi",
-            "version": "==8.0.2"
+            "version": "==10.0.1"
         },
         "markupsafe": {
             "hashes": [
