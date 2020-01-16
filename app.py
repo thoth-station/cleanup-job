@@ -82,11 +82,11 @@ _METRIC_DELETED_JOBS = Counter(
 _RESOURCES = frozenset(
     (
         # apiVersion, Type, delete based on creation (if false, take completionTime in status)
+        ("batch/v1", "Job", False, _METRIC_DELETED_JOBS),
         ("build.openshift.io/v1", "BuildConfig", True, _METRIC_DELETED_BUILDCONFIGS),
         ("image.openshift.io/v1", "ImageStream", True, _METRIC_DELETED_IMAGESTREAMS),
         ("v1", "ConfigMap", True, _METRIC_DELETED_CONFIGMAPS),
-        # ("v1", "Pod", True, _METRIC_DELETED_PODS),
-        ("batch/v1", "Job", False, _METRIC_DELETED_JOBS),
+        ("v1", "Pod", True, _METRIC_DELETED_PODS),
     )
 )
 
