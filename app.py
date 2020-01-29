@@ -97,6 +97,7 @@ def _do_cleanup(cleanup_namespace: str) -> None:
     now = datetime.datetime.now(datetime.timezone.utc)
 
     for resource_version, resource_type, creation_delete, metric in _RESOURCES:
+        _LOGGER.info("Checking resource %r in version %r for clean up", resource_type, resource_version)
         resources = openshift.ocp_client.resources.get(api_version=resource_version, kind=resource_type)
         for item in resources.get(label_selector=_CLEANUP_LABEL_SELECTOR, namespace=cleanup_namespace).items:
             if item.status.phase == "Succeeded" or item.status.succeeded == 1:
