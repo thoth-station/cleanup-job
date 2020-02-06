@@ -22,10 +22,12 @@ import datetime
 import logging
 import os
 import sys
+from typing import Optional
+from typing import Any
 
 from dateutil.parser import parse as datetime_parser
 import click
-from pytimeparse import parse as parse_ttl
+from pytimeparse import parse as pytimeparse_parse
 from prometheus_client import CollectorRegistry
 from prometheus_client import Gauge
 from prometheus_client import Counter
@@ -43,7 +45,7 @@ init_logging()
 
 
 _LOGGER = logging.getLogger("thoth.cleanup_job")
-_DEFAULT_TTL = parse_ttl(os.getenv("THOTH_CLEANUP_DEFAULT_TTL") or "2h")
+_DEFAULT_TTL = pytimeparse_parse(os.getenv("THOTH_CLEANUP_DEFAULT_TTL") or "2h")
 _CLEANUP_LABEL_SELECTOR = "mark=cleanup"
 _PROMETHEUS_REGISTRY = CollectorRegistry()
 _THOTH_METRICS_PUSHGATEWAY_URL = os.getenv("PROMETHEUS_PUSHGATEWAY_URL")
@@ -79,104 +81,199 @@ _METRIC_DELETED_JOBS = Counter(
     "thoth_cleanup_jobs", "Jobs cleaned up.", ["namespace", "component", "resource"], registry=_PROMETHEUS_REGISTRY
 )
 
-_RESOURCES = frozenset(
-    (
-        # apiVersion, Type, delete based on creation (if false, take completionTime in status)
-        ("batch/v1", "Job", False, _METRIC_DELETED_JOBS),
-        ("build.openshift.io/v1", "BuildConfig", True, _METRIC_DELETED_BUILDCONFIGS),
-        ("image.openshift.io/v1", "ImageStream", True, _METRIC_DELETED_IMAGESTREAMS),
-        ("v1", "ConfigMap", True, _METRIC_DELETED_CONFIGMAPS),
-        ("v1", "Pod", True, _METRIC_DELETED_PODS),
-    )
-)
 
-
-def _do_cleanup(cleanup_namespace: str) -> None:
-    """Perform the actual cleanup."""
-    openshift = OpenShift()
+def _creation_based_delete(item: Any, resources: Any, cleanup_namespace: str, metric: Any) -> None:
+    """Delete the given object based on creation time."""
     now = datetime.datetime.now(datetime.timezone.utc)
 
-    for resource_version, resource_type, creation_delete, metric in _RESOURCES:
-        _LOGGER.info("Checking resource %r in version %r for clean up", resource_type, resource_version)
-        resources = openshift.ocp_client.resources.get(api_version=resource_version, kind=resource_type)
-        for item in resources.get(label_selector=_CLEANUP_LABEL_SELECTOR, namespace=cleanup_namespace).items:
-            if item.status.phase == "Succeeded" or item.status.succeeded == 1:
-                _LOGGER.debug(
-                    "Checking expiration of resource %r from namespace %r of kind %r",
+    created = datetime_parser(item.metadata.creationTimestamp)
+    lived_for = (now - created).total_seconds()
+    ttl = _parse_ttl(item.metadata.labels.ttl)
+
+    if lived_for > ttl:
+        _LOGGER.info(
+            "Deleting resource %r of type %r in namespace %r - created at %r",
+            item.metadata.name,
+            resources.kind,
+            cleanup_namespace,
+            item.metadata.creationTimestamp,
+        )
+        try:
+            resources.delete(name=item.metadata.name, namespace=cleanup_namespace)
+            metric.labels(
+                namespace=cleanup_namespace,
+                component=item.metadata.labels.component,
+                resource="BuildConfig",
+            ).inc()
+        except Exception:
+            _LOGGER.exception(
+                "Failed to delete resource %r of type %r in namespace %r",
+                item.metadata.name,
+                resources.kind,
+                cleanup_namespace,
+            )
+    else:
+        _LOGGER.info(
+            "Keeping resource %r of type %r in namespace %r ttl not expired yet (lived for %r, ttl is %r)",
+            item.metadata.name,
+            resources.kind,
+            cleanup_namespace,
+            lived_for,
+            ttl,
+        )
+
+
+def _parse_ttl(field: Optional[str] = None) -> Optional[int]:
+    """Parse time-to-live (TTL) field in carried in the object."""
+    try:
+        return pytimeparse_parse(field) if field else _DEFAULT_TTL
+    except Exception:
+        _LOGGER.exception(
+            "Failed to parse TTL %r",
+            field
+        )
+        return None
+
+
+def _cleanup_job(openshift: OpenShift, cleanup_namespace: str) -> None:
+    """Cleanup resource of type job."""
+    now = datetime.datetime.now(datetime.timezone.utc)
+
+    _LOGGER.info("Cleaning old resources of type job")
+    resources = openshift.ocp_client.resources.get(api_version="batch/v1", kind="Job")
+    for item in resources.get(label_selector=_CLEANUP_LABEL_SELECTOR, namespace=cleanup_namespace).items:
+        if not item.status.succeeded == 1:
+            _LOGGER.info("Skipping %r as it has not been completed successfully", item.metadata.name)
+            continue
+
+        if not item.status.completionTime:
+            _LOGGER.info(
+                "Skipping resource %r of type %r- no completion time found in status field",
+                item.metadata.name,
+                resources.kind,
+            )
+            continue
+
+        completed = datetime_parser(item.status.completionTime)
+        lived_for = (now - completed).total_seconds()
+        ttl = _parse_ttl(item.metadata.labels.ttl)
+
+        if lived_for > ttl:
+            _LOGGER.info(
+                "Deleting resource %r of type %r in namespace %r - created at %r",
+                item.metadata.name,
+                resources.kind,
+                cleanup_namespace,
+                item.metadata.creationTimestamp,
+            )
+            try:
+                resources.delete(name=item.metadata.name, namespace=cleanup_namespace)
+                _METRIC_DELETED_JOBS.labels(
+                    namespace=cleanup_namespace,
+                    component=item.metadata.labels.component,
+                    resource="Job",
+                ).inc()
+            except Exception:
+                _LOGGER.exception(
+                    "Failed to delete resource %r of type %r in namespace %r",
                     item.metadata.name,
-                    cleanup_namespace,
                     resources.kind,
+                    cleanup_namespace,
+                )
+        else:
+            _LOGGER.info(
+                "Keeping resource %r of type %r in namespace %r ttl not expired yet (lived for %r, ttl is %r)",
+                item.metadata.name,
+                resources.kind,
+                cleanup_namespace,
+                lived_for,
+                ttl,
+            )
+
+
+def _cleanup_buildconfig(openshift: OpenShift, cleanup_namespace: str) -> None:
+    """Cleanup resource of type buildconfig."""
+    _LOGGER.info("Cleaning old resources of type buildconfig")
+    resources = openshift.ocp_client.resources.get(api_version="build.openshift.io/v1", kind="BuildConfig")
+    for item in resources.get(label_selector=_CLEANUP_LABEL_SELECTOR, namespace=cleanup_namespace).items:
+        _creation_based_delete(item, resources, cleanup_namespace, _METRIC_DELETED_BUILDCONFIGS)
+
+
+def _cleanup_imagestream(openshift: OpenShift, cleanup_namespace: str) -> None:
+    """Cleanup resource of type imagestream."""
+    _LOGGER.info("Cleaning old resources of type imagestream")
+    resources = openshift.ocp_client.resources.get(api_version="image.openshift.io/v1", kind="ImageStream")
+    for item in resources.get(label_selector=_CLEANUP_LABEL_SELECTOR, namespace=cleanup_namespace).items:
+        _creation_based_delete(item, resources, cleanup_namespace, _METRIC_DELETED_IMAGESTREAMS)
+
+
+def _cleanup_configmap(openshift: OpenShift, cleanup_namespace: str) -> None:
+    """Cleanup resource of type configmap."""
+    _LOGGER.info("Cleaning old resources of type configmap")
+    resources = openshift.ocp_client.resources.get(api_version="v1", kind="ConfigMap")
+    for item in resources.get(label_selector=_CLEANUP_LABEL_SELECTOR, namespace=cleanup_namespace).items:
+        _creation_based_delete(item, resources, cleanup_namespace, _METRIC_DELETED_CONFIGMAPS)
+
+
+def _cleanup_pod(openshift: OpenShift, cleanup_namespace: str) -> None:
+    """Cleanup resource of type pod."""
+    now = datetime.datetime.now(datetime.timezone.utc)
+
+    _LOGGER.info("Cleaning old resources of type pod")
+    resources = openshift.ocp_client.resources.get(api_version="v1", kind="Pod")
+    for item in resources.get(label_selector=_CLEANUP_LABEL_SELECTOR, namespace=cleanup_namespace).items:
+        if item.status.phase != 'Succeeded':
+            _LOGGER.info("Skipping %r as it has not been successful", item.metadata.name)
+            continue
+
+        ttl = _parse_ttl(item.metadata.labels.ttl)
+
+        for container_status in item.status.containerStatuses:
+            finished = datetime_parser(container_status.state.terminated.finishedAt)
+            lived_for = (now - finished).total_seconds()
+
+            if lived_for < ttl:
+                _LOGGER.info(
+                    "Skipping %r of type %r in namespace %r as finished containers lived"
+                    "for %r and did not exceeded ttl %r",
+                    item.metadata.name,
+                    resources.kind,
+                    cleanup_namespace,
+                    lived_for,
+                    ttl,
+                 )
+                break
+        else:
+            _LOGGER.info(
+                "Deleting pod %r in namespace %r, created at %r - pod should be deleted based on ttl %r",
+                item.metadata.name,
+                cleanup_namespace,
+                item.metadata.creationTimestamp,
+                ttl
+            )
+            try:
+                resources.delete(name=item.metadata.name, namespace=cleanup_namespace)
+                _METRIC_DELETED_PODS.labels(
+                    namespace=cleanup_namespace,
+                    component=item.metadata.labels.component,
+                    resource="Pod",
+                ).inc()
+            except Exception:
+                _LOGGER.exception(
+                    "Failed to delete resource %r of type %r in namespace %r",
+                    item.metadata.name,
+                    resources.kind,
+                    cleanup_namespace,
                 )
 
-                ttl = item.metadata.labels.ttl
-                try:
-                    parsed_ttl = parse_ttl(ttl) if ttl else _DEFAULT_TTL
-                except Exception as exc:
-                    _LOGGER.exception(
-                        "Failed to parse TTL %r for resource %r of type %r in namespace %r the object will not be "
-                        "deleted",
-                        ttl,
-                        item.metadata.name,
-                        resources.kind,
-                        cleanup_namespace,
-                    )
-                    continue
 
-                if creation_delete:
-                    if not item.metadata.creationTimestamp:
-                        _LOGGER.info(
-                            "Skipping resource %r of type %r- no creation timestsamp found in metadata",
-                            item.metadata.name,
-                            resources.type,
-                        )
-                        continue
-                    created_str = item.metadata.creationTimestamp
-                else:
-                    if not item.status.completionTime:
-                        _LOGGER.info(
-                            "Skipping resource %r of type %r- no completion time found in status field",
-                            item.metadata.name,
-                            resources.kind,
-                        )
-                        continue
-                    created_str = item.status.completionTime
-
-                created = datetime_parser(created_str)
-                lived_for = (now - created).total_seconds()
-
-                if lived_for > parsed_ttl:
-                    _LOGGER.info(
-                        "Deleting resource %r of type %r in namespace %r - created at %r",
-                        item.metadata.name,
-                        resources.kind,
-                        cleanup_namespace,
-                        created_str,
-                    )
-                    try:
-                        resources.delete(name=item.metadata.name, namespace=cleanup_namespace)
-                        metric.labels(
-                            namespace=cleanup_namespace,
-                            component=item.metadata.labels.component,
-                            resource=resource_type,
-                        ).inc()
-                    except Exception as exc:
-                        _LOGGER.exception(
-                            "Failed to delete resource %r of type %r in namespace %r",
-                            item.metadata.name,
-                            resources.kind,
-                            cleanup_namespace,
-                        )
-                else:
-                    _LOGGER.info(
-                        "Keeping resource %r of type %r in namespace %r ttl not expired yet (lived for %r, ttl is %r)",
-                        item.metadata.name,
-                        resources.kind,
-                        cleanup_namespace,
-                        lived_for,
-                        parsed_ttl,
-                    )
-            else:
-                _LOGGER.info("Skipping resource %r- at phase %r", item.metadata.name, item.status.phase)
+_CLEANUP_HANDLERS = (
+    _cleanup_job,
+    _cleanup_buildconfig,
+    _cleanup_imagestream,
+    _cleanup_configmap,
+    _cleanup_pod,
+)
 
 
 @click.command()
@@ -197,9 +294,12 @@ def cli(cleanup_namespace: str, verbose: bool = False):
     _LOGGER.info("Cleanup will be performed in namespace %r", cleanup_namespace)
     _METRIC_INFO.labels(__version__).inc()
 
+    openshift = OpenShift()
+
     with _METRIC_RUNTIME.time():
         try:
-            _do_cleanup(cleanup_namespace)
+            for cleanup_handler in _CLEANUP_HANDLERS:
+                cleanup_handler(openshift, cleanup_namespace)
         finally:
             if _THOTH_METRICS_PUSHGATEWAY_URL:
                 try:
