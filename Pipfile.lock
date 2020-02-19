@@ -82,10 +82,10 @@
         },
         "google-auth": {
             "hashes": [
-                "sha256:5b6f71953db7d9bee2e967120f90e45ccdc12a219b89fa1209bec3e10bb245b3",
-                "sha256:74655ad79b89611f93b899ea8fe1194970a1701fe1d692bf2beb0e67bcb0f4d4"
+                "sha256:1ee22e22f35d6e00f068d7b3999b2ce24ecb5d0dcbd485aa6896d2b83c8907d6",
+                "sha256:28a848d47c55075a0f29d7e26b7a213515c137ab8f0670e546e46d1277060e47"
             ],
-            "version": "==1.11.1"
+            "version": "==1.11.2"
         },
         "idna": {
             "hashes": [
@@ -163,10 +163,10 @@
         },
         "openshift": {
             "hashes": [
-                "sha256:ce7411a5689e6d3831bb5dc08a8c324860d71e3dd5547ba44f4d139cfa57c34b"
+                "sha256:10868c5697c7610e1d18d62118f1bf2096d35789fa9790c89285947a93545a8a"
             ],
             "index": "pypi",
-            "version": "==0.10.1"
+            "version": "==0.10.2"
         },
         "prometheus-client": {
             "hashes": [
