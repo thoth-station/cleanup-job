@@ -89,10 +89,10 @@
         },
         "idna": {
             "hashes": [
-                "sha256:c357b3f628cf53ae2c4c05627ecc484553142ca23264e593d327bcde5e9c3407",
-                "sha256:ea8b7f6188e6fa117537c3df7da9fc686d485087abf6ac197f9c46432f7e4a3c"
+                "sha256:7588d1c14ae4c77d74036e8c22ff447b26d0fde8f007354fd48a7814db15b7cb",
+                "sha256:a068a21ceac8a4d63dbfd964670474107f541babbd2250d61922f029858365fa"
             ],
-            "version": "==2.8"
+            "version": "==2.9"
         },
         "jinja2": {
             "hashes": [
@@ -242,10 +242,10 @@
         },
         "requests": {
             "hashes": [
-                "sha256:11e007a8a2aa0323f5a921e9e6a2d7e4e67d9877e85773fba9ba6419025cbeb4",
-                "sha256:9cf5292fcd0f598c671cfc1e0d7d1a7f13bb8085e9a590f48c010551dc6c4b31"
+                "sha256:43999036bfa82904b6af1d99e4882b560e5e2c68e5c4b0aa03b655f3d7d73fee",
+                "sha256:b3f43d496c6daba4493e7c431722aeb7dbc6288f52a6e04e7b6023b0247817e6"
             ],
-            "version": "==2.22.0"
+            "version": "==2.23.0"
         },
         "requests-oauthlib": {
             "hashes": [
@@ -316,11 +316,11 @@
         },
         "thoth-common": {
             "hashes": [
-                "sha256:b0592552be149272d6a2fcee75061b9bc9a36a94a0e20df236b0fea434e73052",
-                "sha256:cf7dbafab13c7f5ecb325ab3fe0697152fd28d0bc6f814fa552a79e4da2974fc"
+                "sha256:ddc90cf67e3eae0a56c2dc151a1244e933b09a9b700e2b02d7a6c20d51b054c0",
+                "sha256:f0ee90918995ece2d900d460b63f6a801762366015335d47663d9cbd424f4d66"
             ],
             "index": "pypi",
-            "version": "==0.10.7"
+            "version": "==0.10.8"
         },
         "tzlocal": {
             "hashes": [
