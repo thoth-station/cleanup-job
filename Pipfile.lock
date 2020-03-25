@@ -82,10 +82,10 @@
         },
         "google-auth": {
             "hashes": [
-                "sha256:4fddaf62bcfc3b9cc1bb2062130937a25ebe781b8eb15beec217c160b8cabb68",
-                "sha256:ec172006e626bb90f6069e9358c373bc991a15da6cc55276986d9ecd29235b15"
+                "sha256:016924388770b7e66c7e9ade1c4c3144ee88812d79697fd6c0dad9abdfcda2fd",
+                "sha256:01d686448f57d3bc027726474faa1aa650ba333bedb392e06938b0add8ec8d3a"
             ],
-            "version": "==1.11.3"
+            "version": "==1.12.0"
         },
         "idna": {
             "hashes": [
@@ -323,11 +323,11 @@
         },
         "thoth-common": {
             "hashes": [
-                "sha256:61a7662dba3cb96badb7aab98661bc9edbb7078129701d521daf43eebf57cc26",
-                "sha256:e5f14670177884508d246b12fd4f5dd08a989fbf02a1f4e4de5c2ada6030749e"
+                "sha256:499f967d0d624894ff3936cf5cc4787c177b6b2da2d269d83944b197a8b97def",
+                "sha256:a61a0926aec36298dd923ee3fbc0c3c64e2b3105b714bc51037dbc2b025b9f6f"
             ],
             "index": "pypi",
-            "version": "==0.12.1"
+            "version": "==0.12.2"
         },
         "tzlocal": {
             "hashes": [
