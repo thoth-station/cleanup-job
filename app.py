@@ -77,6 +77,12 @@ _METRIC_DELETED_CONFIGMAPS = Counter(
 _METRIC_DELETED_PODS = Counter(
     "thoth_cleanup_job_pods", "Pods cleaned up.", ["namespace", "component", "resource"], registry=_PROMETHEUS_REGISTRY
 )
+_METRIC_DELETED_WORKFLOWS = Counter(
+    "thoth_cleanup_job_workflows",
+    "Workflows cleaned up.",
+    ["namespace", "component", "resource"],
+    registry=_PROMETHEUS_REGISTRY
+)
 _METRIC_DELETED_JOBS = Counter(
     "thoth_cleanup_jobs", "Jobs cleaned up.", ["namespace", "component", "resource"], registry=_PROMETHEUS_REGISTRY
 )
@@ -267,12 +273,63 @@ def _cleanup_pod(openshift: OpenShift, cleanup_namespace: str) -> None:
                 )
 
 
+def _cleanup_workflows(openshift: OpenShift, cleanup_namespace: str) -> None:
+    """Clean up finished Argo workflows if Argo does not clean them up."""
+    now = datetime.datetime.now(datetime.timezone.utc)
+
+    _LOGGER.info("Cleaning old Argo workflows")
+    resources = openshift.ocp_client.resources.get(api_version="argoproj.io/v1alpha1", kind="Workflow")
+    for item in resources.get(namespace=cleanup_namespace).items:
+        if item.status.finishedAt is None:
+            _LOGGER.info("Skipping %r as it is not finished yet", item.metadata.name)
+            continue
+
+        ttl = _parse_ttl(item.metadata.labels.ttl)
+        finished = datetime_parser(item.status.finishedAt)
+        lived_for = (now - finished).total_seconds()
+
+        if lived_for < ttl:
+            _LOGGER.info(
+                "Skipping %r of type %r in namespace %r as workflow lived"
+                "for %r and did not exceeded ttl %r",
+                item.metadata.name,
+                resources.kind,
+                cleanup_namespace,
+                lived_for,
+                ttl,
+             )
+            continue
+
+        _LOGGER.info(
+            "Deleting workflow %r in namespace %r, created at %r",
+            item.metadata.name,
+            cleanup_namespace,
+            item.metadata.creationTimestamp,
+        )
+
+        try:
+            resources.delete(name=item.metadata.name, namespace=cleanup_namespace)
+            _METRIC_DELETED_WORKFLOWS.labels(
+                namespace=cleanup_namespace,
+                component=item.metadata.labels.component,
+                resource="Workflow",
+            ).inc()
+        except Exception:
+            _LOGGER.exception(
+                "Failed to delete resource %r of type %r in namespace %r",
+                item.metadata.name,
+                resources.kind,
+                cleanup_namespace,
+            )
+
+
 _CLEANUP_HANDLERS = (
     _cleanup_job,
     _cleanup_buildconfig,
     _cleanup_imagestream,
     _cleanup_configmap,
     _cleanup_pod,
+    _cleanup_workflows,
 )
 
 
