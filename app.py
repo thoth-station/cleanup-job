@@ -35,10 +35,11 @@ from prometheus_client import push_to_gateway
 
 from thoth.common import init_logging
 from thoth.common import OpenShift
-from thoth.common import __version__ as __common__version__
+from thoth.common import __version__ as __common_version__
+from version import __version__
 
 
-__version__ = f"0.7.0+common.{__common__version__}"
+__service_version__ = f"{__version__}+common.{__common_version__}"
 
 
 init_logging()
@@ -81,7 +82,7 @@ _METRIC_DELETED_WORKFLOWS = Counter(
     "thoth_cleanup_job_workflows",
     "Workflows cleaned up.",
     ["namespace", "component", "resource"],
-    registry=_PROMETHEUS_REGISTRY
+    registry=_PROMETHEUS_REGISTRY,
 )
 _METRIC_DELETED_JOBS = Counter(
     "thoth_cleanup_jobs", "Jobs cleaned up.", ["namespace", "component", "resource"], registry=_PROMETHEUS_REGISTRY
@@ -107,9 +108,7 @@ def _creation_based_delete(item: Any, resources: Any, cleanup_namespace: str, me
         try:
             resources.delete(name=item.metadata.name, namespace=cleanup_namespace)
             metric.labels(
-                namespace=cleanup_namespace,
-                component=item.metadata.labels.component,
-                resource="BuildConfig",
+                namespace=cleanup_namespace, component=item.metadata.labels.component, resource="BuildConfig",
             ).inc()
         except Exception:
             _LOGGER.exception(
@@ -134,10 +133,7 @@ def _parse_ttl(field: Optional[str] = None) -> Optional[int]:
     try:
         return pytimeparse_parse(field) if field else _DEFAULT_TTL
     except Exception:
-        _LOGGER.exception(
-            "Failed to parse TTL %r",
-            field
-        )
+        _LOGGER.exception("Failed to parse TTL %r", field)
         return None
 
 
@@ -175,9 +171,7 @@ def _cleanup_job(openshift: OpenShift, cleanup_namespace: str) -> None:
             try:
                 resources.delete(name=item.metadata.name, namespace=cleanup_namespace)
                 _METRIC_DELETED_JOBS.labels(
-                    namespace=cleanup_namespace,
-                    component=item.metadata.labels.component,
-                    resource="Job",
+                    namespace=cleanup_namespace, component=item.metadata.labels.component, resource="Job",
                 ).inc()
             except Exception:
                 _LOGGER.exception(
@@ -228,7 +222,7 @@ def _cleanup_pod(openshift: OpenShift, cleanup_namespace: str) -> None:
     _LOGGER.info("Cleaning old resources of type pod")
     resources = openshift.ocp_client.resources.get(api_version="v1", kind="Pod")
     for item in resources.get(label_selector=_CLEANUP_LABEL_SELECTOR, namespace=cleanup_namespace).items:
-        if item.status.phase != 'Succeeded':
+        if item.status.phase != "Succeeded":
             _LOGGER.info("Skipping %r as it has not been successful", item.metadata.name)
             continue
 
@@ -247,7 +241,7 @@ def _cleanup_pod(openshift: OpenShift, cleanup_namespace: str) -> None:
                     cleanup_namespace,
                     lived_for,
                     ttl,
-                 )
+                )
                 break
         else:
             _LOGGER.info(
@@ -255,14 +249,12 @@ def _cleanup_pod(openshift: OpenShift, cleanup_namespace: str) -> None:
                 item.metadata.name,
                 cleanup_namespace,
                 item.metadata.creationTimestamp,
-                ttl
+                ttl,
             )
             try:
                 resources.delete(name=item.metadata.name, namespace=cleanup_namespace)
                 _METRIC_DELETED_PODS.labels(
-                    namespace=cleanup_namespace,
-                    component=item.metadata.labels.component,
-                    resource="Pod",
+                    namespace=cleanup_namespace, component=item.metadata.labels.component, resource="Pod",
                 ).inc()
             except Exception:
                 _LOGGER.exception(
@@ -290,14 +282,13 @@ def _cleanup_workflows(openshift: OpenShift, cleanup_namespace: str) -> None:
 
         if lived_for < ttl:
             _LOGGER.info(
-                "Skipping %r of type %r in namespace %r as workflow lived"
-                "for %r and did not exceeded ttl %r",
+                "Skipping %r of type %r in namespace %r as workflow lived" "for %r and did not exceeded ttl %r",
                 item.metadata.name,
                 resources.kind,
                 cleanup_namespace,
                 lived_for,
                 ttl,
-             )
+            )
             continue
 
         _LOGGER.info(
@@ -310,9 +301,7 @@ def _cleanup_workflows(openshift: OpenShift, cleanup_namespace: str) -> None:
         try:
             resources.delete(name=item.metadata.name, namespace=cleanup_namespace)
             _METRIC_DELETED_WORKFLOWS.labels(
-                namespace=cleanup_namespace,
-                component=item.metadata.labels.component,
-                resource="Workflow",
+                namespace=cleanup_namespace, component=item.metadata.labels.component, resource="Workflow",
             ).inc()
         except Exception:
             _LOGGER.exception(
