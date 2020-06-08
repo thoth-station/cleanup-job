@@ -19,4 +19,4 @@
 """This is a cleanup job for Thoth."""
 
 
-__version__ = "0.8.0"
+__version__ = "0.8.1"
